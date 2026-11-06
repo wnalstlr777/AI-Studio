@@ -1,6 +1,6 @@
 import { bindPetInput } from './input.js';
 import { QAPoller, EventLedger, snapshot, classify, messages, runUrl } from './shared/hina/state.js';
-import { IdlePlayer } from './shared/hina/idle-player.js';
+import { IdlePlayer, isIdleState } from './shared/hina/idle-player.js';
 import { MotionView } from './shared/hina/motion-view.js';
 import { IDLE_MANIFEST_URL } from './shared/hina/remote-assets-policy.js';
 import { RemoteAssets, AssetStore } from './shared/hina/remote-assets.js';
@@ -18,7 +18,7 @@ function read(key,fallback) { try { return JSON.parse(localStorage.getItem(key))
 let prefs = { top:true,roam:true,notifications:true,size:200,...read('hina.settings',{}) };
 prefs.size=Math.min(240,Math.max(140,Number(prefs.size)||200));
 let ledger = new EventLedger(read('hina.events',{}));
-let latest = { state:'IDLE',run:null }, state='IDLE', direction=1, alertRun=null, flashUntil=0, pausedUntil=0, connected=false;
+let latest = { state:'IDLE',run:null }, state='IDLE', direction=1, alertRun=null, flashUntil=0, pausedUntil=0, connected=false, qaDeferred=false;
 let movementTimer, behaviorTimer, bubbleTimer, maskTimer, moving=false, interacting=false;
 let maskBusy=false, maskDirty=false;
 let roaming='IDLE';
@@ -32,7 +32,7 @@ let compareOriginal=false;
 function scheduleIdleMotion(){clearInterval(idleMotionTimer);idleMotionTimer=setInterval(()=>{if(!interacting&&!greetingActive)idlePlayer.tick();},100);}
 function motionInfo(){
   const entry=remoteAssets.getMotion($('#idle-motion').value,{review:true});
-  $('#motion-info').textContent=state!=='IDLE'?`${state} 우선 · Idle 검수는 대기 복귀 후 가능`:entry?`${entry.frames}프레임 · ${(entry.durationMs/1000).toFixed(1)}초 · ${entry.width}×${entry.height} · 발 ${entry.footY}px · ${entry.complete?'승인됨':'시안 / 복원부 검수 필요'}`:'등록되지 않은 모션';
+  $('#motion-info').textContent=!isIdleState(state)?`${state} 우선 · Idle 검수는 대기 복귀 후 가능`:entry?`${entry.frames}프레임 · ${(entry.durationMs/1000).toFixed(1)}초 · ${entry.width}×${entry.height} · 발 ${entry.footY}px · ${entry.complete?'승인됨':'시안 / 복원부 검수 필요'}`:'등록되지 않은 모션';
   $('#motion-pause').textContent=idlePlayer.paused?'재생':'일시정지';
   if(idlePlayer.asset())$('#idle-motion').value=idlePlayer.id;
 }
@@ -61,8 +61,9 @@ function showBubble(text,timeout=0) {
 }
 function render(next,force=false) {
   const changed=state!==next;state=next;idlePlayer.setState(next);
-  if(next!=='IDLE'){greetingActive=false;activeGreetingSrc='';clearTimeout(greetingEndTimer);compareOriginal=false;$('#compare-original').checked=false;}
-  const motion=next==='IDLE'&&!compareOriginal&&!greetingActive?idlePlayer.asset():null;
+  if(next!=='IDLE'){greetingActive=false;activeGreetingSrc='';clearTimeout(greetingEndTimer);}
+  if(!isIdleState(next)){compareOriginal=false;$('#compare-original').checked=false;}
+  const motion=isIdleState(next)&&!compareOriginal&&!greetingActive?idlePlayer.asset():null;
   const asset=compareOriginal?{...displayAsset('IDLE'),src:new URL('./shared/hina/assets/secretary.png',import.meta.url).href,localIdleStyle:false,label:'원본 비교'}:motion||displayAsset(next);
   const src=greetingActive&&next==='IDLE'?activeGreetingSrc:asset.src;
   if(!motion){motionView.close();if($('#character').src!==src)$('#character').src=src;}
@@ -78,7 +79,7 @@ function render(next,force=false) {
 function baseState() { return latest.state==='WORK' && connected ? 'WORK' : roaming; }
 function settle() {
   if(alertRun) { render('ALERT'); return; }
-  if(!connected){render('CONNECTION_ERROR');return;}
+  if(!connected){render(qaDeferred?'IDLE':'CONNECTION_ERROR');return;}
   if(Date.now()<flashUntil) { render('SUCCESS'); return; }
   render(baseState());
 }
@@ -143,7 +144,7 @@ document.oncontextmenu=e=>{e.preventDefault();openSettings();};
 $('#close-settings').onclick=()=>{$('#settings').hidden=true;updateMask();};
 $('#exit').onclick=()=>invoke('quit');
 $('#idle-motion').onchange=e=>{greetingActive=false;clearTimeout(greetingEndTimer);idlePlayer.select(e.target.value,{loop:$('#motion-loop').checked});motionInfo();};
-$('#motion-loop').onchange=()=>{if(state==='IDLE')idlePlayer.select($('#idle-motion').value,{loop:$('#motion-loop').checked});};
+$('#motion-loop').onchange=()=>{if(isIdleState(state))idlePlayer.select($('#idle-motion').value,{loop:$('#motion-loop').checked});};
 $('#motion-pause').onclick=()=>{idlePlayer.togglePause();};
 $('#motion-reset').onclick=()=>{compareOriginal=false;$('#compare-original').checked=false;idlePlayer.reset();};
 $('#motion-random').onclick=()=>{idlePlayer.reset({reviewRandom:true});};
@@ -168,10 +169,11 @@ for(const id of ['top','roam','notifications','size']) {
 }
 function applySize(){ $('#pet').style.width=prefs.size+'px';$('#pet').style.height=(prefs.size+56)+'px';$('#bubble').style.bottom=(prefs.size+66)+'px';updateMask(); }
 $('#autostart').onchange=async e=>{try {e.target.checked=await invoke('autostart',{enabled:e.target.checked});}catch(error){e.target.checked=!e.target.checked;settingsError(error);}};
-const poller=new QAPoller({
+const poller=new QAPoller({storage:localStorage,
+  onCached(_runs,{retryAt}){qaDeferred=true;$('#qa-connection').textContent=`QA 저장된 결과 · ${new Date(retryAt).toLocaleTimeString()} 재조회 대기`;settle();},
   async onResult(runs){
     const fresh=ledger.accept(runs);localStorage.setItem('hina.events',JSON.stringify(ledger.save()));
-    connected=true;$('#qa-connection').textContent='QA 연결 정상 · '+new Date().toLocaleTimeString();latest=snapshot(runs);
+    connected=true;qaDeferred=false;$('#qa-connection').textContent='QA 연결 정상 · '+new Date().toLocaleTimeString();latest=snapshot(runs);
     const event=fresh[0];
     if(event){
       const next=classify(event);
@@ -185,7 +187,7 @@ const poller=new QAPoller({
     else if(Date.now()>=flashUntil) showBubble('');
     settle();
   },
-  onError(error){connected=false;$('#qa-connection').textContent=`QA 연결: ${error.message} · ${new Date(error.retryAt||Date.now()+120000).toLocaleTimeString()} 재시도`;if(!alertRun){render('CONNECTION_ERROR');showBubble(messages.CONNECTION_ERROR+'\nQA 결과 미확인 · 자동 재시도');}}
+  onError(error){connected=false;qaDeferred=false;$('#qa-connection').textContent=`QA 연결: ${error.message} · ${new Date(error.retryAt||Date.now()+120000).toLocaleTimeString()} 재시도`;if(!alertRun){render('CONNECTION_ERROR');showBubble(messages.CONNECTION_ERROR+'\nQA 결과 미확인 · 자동 재시도');}}
 });
 async function init(){
   applySize();render('IDLE');

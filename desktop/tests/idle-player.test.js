@@ -13,11 +13,15 @@ test('manual one-shot/loop and paused deadline use actual clip duration',()=>{
 });
 test('QA and movement preempt manual motion, pause, and draft random review',()=>{
  const h=setup({draft:true}),p=h.player;p.reset({reviewRandom:true});h.advance(6000);assert.equal(p.id,'IDLE_HAPPY');
- for(const state of ['WORK','ALERT','SUCCESS','CONNECTION_ERROR','WALK','REST']){p.setState(state);assert.equal(p.asset(),null);assert.equal(p.select('IDLE_CHEER'),false);assert.equal(p.togglePause(),false);p.setState('IDLE');assert.equal(p.reviewRandom,false);assert.equal(p.asset(),null);}
+ for(const state of ['WORK','ALERT','SUCCESS','WALK','REST']){p.setState(state);assert.equal(p.asset(),null);assert.equal(p.select('IDLE_CHEER'),false);assert.equal(p.togglePause(),false);p.setState('IDLE');assert.equal(p.reviewRandom,false);assert.equal(p.asset(),null);}
 });
 test('drafts require explicit review; unknown motions cannot be selected',()=>{
  const h=setup({draft:true}),p=h.player;h.advance(100000);assert.equal(p.asset(),null);assert.equal(p.id,'IDLE_NORMAL');assert.equal(p.select('bad'),false);assert.equal(p.select('IDLE_CHEER'),true);assert.equal(p.asset().id,'IDLE_CHEER');h.advance(2000);assert.equal(p.asset(),null);
 });
 test('loading time does not consume the one-shot animation duration',()=>{
  const h=setup(),p=h.player;p.select('IDLE_NOTE');p.loading();h.advance(9000);assert.equal(p.id,'IDLE_NOTE');p.loaded();h.advance(1999);assert.equal(p.id,'IDLE_NOTE');h.advance(1);assert.equal(p.id,'IDLE_NORMAL');
+});
+
+test('connection failure keeps local manual/random review available without changing QA state',()=>{
+ const h=setup({draft:true}),p=h.player;p.setState('CONNECTION_ERROR');assert.equal(p.select('IDLE_NOTE'),true);assert.equal(p.state,'CONNECTION_ERROR');p.reset({reviewRandom:true});h.advance(6000);assert.equal(p.id,'IDLE_HAPPY');assert.equal(p.state,'CONNECTION_ERROR');p.setState('IDLE');assert.equal(p.reviewRandom,true);p.setState('WORK');assert.equal(p.asset(),null);assert.equal(p.reviewRandom,false);
 });

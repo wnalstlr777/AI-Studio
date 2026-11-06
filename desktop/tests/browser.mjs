@@ -63,8 +63,8 @@ try{
   await page.evaluate(()=>window.__random=.5);await page.clock.fastForward(31000);await input('WALK');
   await page.evaluate(()=>window.__random=.9);await page.clock.fastForward(31000);await input('REST');
   const run={id:424242,run_attempt:1,status:'in_progress',conclusion:null,created_at:new Date(Date.now()+86400000).toISOString(),html_url:'https://github.com/wnalstlr777/AI-Studio/actions/runs/424242'};
-  runs=[run];await page.clock.fastForward(120001);await input('WORK');
-  runs=[{...run,status:'completed',conclusion:'failure'}];await page.clock.fastForward(120001);await input('ALERT');
+  runs=[run];await page.clock.fastForward(300001);await input('WORK');
+  runs=[{...run,status:'completed',conclusion:'failure'}];await page.clock.fastForward(300001);await input('ALERT');
   await page.locator('#bubble').click();assert.equal(await page.evaluate(()=>window.__calls.filter(c=>c.name==='open_run').at(-1).args.url),run.html_url);
   const mask=await page.evaluate(()=>window.__calls.filter(c=>c.name==='hit_map').at(-1)?.args);
   assert.ok(mask?.pixels.includes(0)&&mask.pixels.includes(1),'alpha mask must retain transparent and interactive areas');

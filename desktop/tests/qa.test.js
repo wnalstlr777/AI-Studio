@@ -21,13 +21,13 @@ test('completion observed after running baseline becomes an event',()=>{
 });
 test('untrusted URL is rejected',()=>{assert.equal(runUrl({...run(1),html_url:'javascript:alert(1)'}),null);});
 test('network error never produces success/failure; ETag cache restores connection',async()=>{
-  let results=[],errors=[],requests=[];let n=0;
-  const poller=new QAPoller({onResult:r=>results.push(r),onError:e=>errors.push(e),fetcher:async(url,opts)=>{
+  let results=[],errors=[],requests=[];let n=0,clock=Date.now();
+  const poller=new QAPoller({now:()=>clock,onResult:r=>results.push(r),onError:e=>errors.push(e),fetcher:async(url,opts)=>{
     requests.push(opts);n++;if(n===2)throw new Error('offline');
     if(n===3)return new Response(null,{status:304});
     return Response.json({workflow_runs:[run(1)]},{headers:{etag:'"v1"'}});
   }});
-  try {await poller.start();await poller.poll();assert.equal(results.length,1);assert.equal(errors.length,1);await poller.poll();assert.equal(results.length,2);assert.equal(requests[2].headers['If-None-Match'],'"v1"');}
+  try {await poller.start();clock+=300000;await poller.poll();assert.equal(results.length,1);assert.equal(errors.length,1);clock+=600000;await poller.poll();assert.equal(results.length,2);assert.equal(requests[2].headers['If-None-Match'],'"v1"');}
   finally {poller.stop();}
 });
 test('rate limit prevents immediate repeated manual requests',async()=>{
@@ -51,4 +51,18 @@ test('connection diagnostics distinguish limits, permissions, 404, and timeout',
 test('a stopped poll cannot deliver an in-flight result',async()=>{
  let finish,called=false;const p=new QAPoller({onResult:()=>called=true,onError:()=>assert.fail(),fetcher:()=>new Promise(r=>finish=r)});
  const pending=p.start();p.stop();finish(Response.json({workflow_runs:[]}));await pending;assert.equal(called,false);
+});
+
+const memoryStorage=()=>{const data=new Map();return {getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,v)};};
+test('rate-limit cooldown survives restart and recovers after reset with one request',async()=>{
+ const storage=memoryStorage();let clock=Date.now(),calls=0,errors=0,results=0;
+ const options={storage,now:()=>clock,onResult:()=>results++,onError:()=>errors++,fetcher:async()=>{calls++;return calls===1?new Response('',{status:403,headers:{'x-ratelimit-remaining':'0','x-ratelimit-reset':String(Math.floor(clock/1000)+3600)}}):Response.json({workflow_runs:[]});}};
+ const a=new QAPoller(options);await a.start();a.stop();assert.equal(calls,1);
+ const b=new QAPoller(options);try{await b.start();await b.poll();assert.equal(calls,1);assert.equal(errors,2);clock+=3600001;await b.poll();assert.equal(calls,2);assert.equal(results,1);await b.poll();assert.equal(calls,2);}finally{b.stop();}
+});
+test('persisted ETag/cache and polling interval suppress restart, manual and second-tab duplicates',async()=>{
+ const storage=memoryStorage();let clock=Date.now(),calls=0,lastHeaders,cached=0,results=[];
+ const options={storage,now:()=>clock,onCached:()=>cached++,onResult:r=>results.push(r),onError:()=>assert.fail(),fetcher:async(_,o)=>{calls++;lastHeaders=o.headers;return calls===1?Response.json({workflow_runs:[run(1)]},{headers:{etag:'"persisted"'}}):new Response(null,{status:304});}};
+ const a=new QAPoller(options);await a.start();a.stop();const b=new QAPoller(options),c=new QAPoller(options);
+ try{await b.start();await c.start();await b.poll();assert.equal(calls,1);clock+=300000;await b.poll();await c.poll();assert.equal(calls,2);assert.equal(lastHeaders['If-None-Match'],'"persisted"');assert.equal(results.length,2);assert.equal(cached,2);}finally{b.stop();c.stop();}
 });

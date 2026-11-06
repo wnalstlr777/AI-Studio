@@ -8,7 +8,8 @@ function display(state,message='') {
   const asset=assetFor(state);$('#hina-character').src=asset.src;$('#hina-asset').textContent=asset.label;
 }
 display('IDLE');
-const poller=new QAPoller({
+const poller=new QAPoller({storage:localStorage,
+  onCached(_runs,{retryAt}){$('#run-result').textContent=`저장된 QA 결과 · ${new Date(retryAt).toLocaleTimeString()} 재조회 대기`;$('#hina-status').textContent='QA 저장된 결과 · 실시간 조회 대기';},
   onResult(runs) {
     const {state,run}=snapshot(runs);clearTimeout(successTimer);
     const description=run?`Sea QA: ${state} · ${run.conclusion||run.status}`:'아직 Sea QA 실행 기록이 없습니다.';

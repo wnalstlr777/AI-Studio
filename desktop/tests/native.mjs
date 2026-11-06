@@ -67,8 +67,8 @@ try{
   await page.evaluate(()=>Math.random=()=>.9);await page.clock.fastForward(31000);await page.waitForFunction(()=>document.body.dataset.state==='REST');await clickOffice('native input after REST transition');
   await page.evaluate(()=>{const el=document.querySelector('#roam');el.checked=false;el.dispatchEvent(new Event('change'));});
   const run={id:525252,run_attempt:1,status:'in_progress',conclusion:null,created_at:new Date(Date.now()+86400000).toISOString(),html_url:'https://github.com/wnalstlr777/AI-Studio/actions/runs/525252'};
-  runs=[run];await page.clock.fastForward(120001);await page.waitForFunction(()=>document.body.dataset.state==='WORK');await clickOffice('native input after WORK transition');
-  runs=[{...run,status:'completed',conclusion:'failure'}];await page.clock.fastForward(120001);await page.waitForFunction(()=>document.body.dataset.state==='ALERT');await clickOffice('native input after ALERT transition');
+  runs=[run];await page.clock.fastForward(300001);await page.waitForFunction(()=>document.body.dataset.state==='WORK');await clickOffice('native input after WORK transition');
+  runs=[{...run,status:'completed',conclusion:'failure'}];await page.clock.fastForward(300001);await page.waitForFunction(()=>document.body.dataset.state==='ALERT');await clickOffice('native input after ALERT transition');
   const bubble=await point('#bubble');mouse(bubble.x,bubble.y);await page.waitForFunction(url=>window.__TAURI__.core.invoke('qa_probe').then(p=>p.last_url===url),run.html_url);
   report.results.push({case:'native QA error bubble opens exact run target',status:'passed'});
   await clickOffice('office target before notification');
@@ -78,6 +78,17 @@ try{
   // Notification click is dispatched in the real WebView. Main character uses Win32 mouse above.
   await notice.locator('#open').click();await page.waitForFunction(url=>window.__TAURI__.core.invoke('qa_probe').then(p=>p.last_url===url),run.html_url);
   report.results.push({case:'native notification click targets exact Actions run',status:'passed'});
+  // Verify the actual installed EXE contains and decodes all eight motions under 403.
+  let limitedCalls=0;const reset=Math.floor(await page.evaluate(()=>Date.now())/1000)+3600;
+  await context.unroute('https://api.github.com/**');await context.route('https://api.github.com/**',route=>{limitedCalls++;return route.fulfill({status:403,headers:{'x-ratelimit-remaining':'0','x-ratelimit-reset':String(reset)},json:{message:'API rate limit exceeded'}});});
+  await page.clock.fastForward(300001);await page.waitForFunction(()=>document.body.dataset.state==='CONNECTION_ERROR');
+  await page.evaluate(()=>document.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true})));await page.locator('#motion-loop').check();
+  const motionIds=await page.locator('#idle-motion option').evaluateAll(options=>options.map(o=>o.value));assert.equal(motionIds.length,8);
+  for(const id of motionIds){await page.locator('#idle-motion').selectOption(id);await page.locator('#motion-canvas').waitFor({state:'visible'});assert.equal(await page.locator('body').getAttribute('data-idle-motion'),id);}
+  await page.locator('#close-settings').click();await clickOffice('native click with local motion during HTTP 403');
+  assert.equal(limitedCalls,1);await page.addInitScript(()=>{Math.random=()=>0;});await page.reload();await page.waitForFunction(()=>document.body.dataset.state==='CONNECTION_ERROR');assert.equal(limitedCalls,1);
+  await page.evaluate(()=>{Math.random=()=>0;document.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));});await page.locator('#motion-random').click();await page.locator('#motion-canvas').waitFor({state:'visible'});await page.clock.fastForward(6100);await page.waitForFunction(()=>document.body.dataset.idleMotion==='IDLE_HAPPY');assert.equal(limitedCalls,1);
+  report.results.push({case:'EXE contains all eight motions; 403 random review and restart cooldown',status:'passed'});
   await page.screenshot({path:await mkdir('qa-results',{recursive:true}).then(()=> 'qa-results/windows-native.png')});
   await page.evaluate(()=>window.__TAURI__.core.invoke('quit')).catch(()=>{});
   for(let i=0;i<50&&exitCode===undefined;i++)await sleep(100);
