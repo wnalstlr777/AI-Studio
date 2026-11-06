@@ -1,0 +1,45 @@
+name: Generate and deploy Hina WALK
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/generate_hina_walk.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+concurrency:
+  group: hina-walk-publish
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - run: python -m pip install --disable-pip-version-check pillow==11.3.0 numpy==2.3.3
+      - run: python scripts/generate_hina_walk.py
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node desktop/scripts/validate-asset-manifest.mjs
+      - name: Commit animation and manifest
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add shared/hina/assets/walk.gif shared/hina/assets/manifest.json
+          git diff --cached --quiet || (git commit -m 'Add Hina WALK 2D animation asset' && git push)
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+      - id: deployment
+        uses: actions/deploy-pages@v4
