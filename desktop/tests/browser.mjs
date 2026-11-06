@@ -69,6 +69,9 @@ try{
   const mask=await page.evaluate(()=>window.__calls.filter(c=>c.name==='hit_map').at(-1)?.args);
   assert.ok(mask?.pixels.includes(0)&&mask.pixels.includes(1),'alpha mask must retain transparent and interactive areas');
   await remoteAssetChecks(page,{onUpdatedInput:()=>input('IDLE'),resetQA:()=>{runs=[];}});
+  await page.evaluate(()=>{window.__random=.5;const el=document.querySelector('#roam');el.checked=true;el.dispatchEvent(new Event('change'));});
+  await page.clock.fastForward(31000);assert.equal(await page.locator('body').getAttribute('data-state'),'WALK','Healthy cached startup must preserve roaming before the next QA request');
+  results.push({case:'cached startup keeps local roaming available',status:'passed',scope:'browser mock IPC'});
   assert.deepEqual(errors,[]);
   await mkdir('qa-results',{recursive:true});await page.screenshot({path:'qa-results/desktop-browser.png',omitBackground:true});
   await writeFile('qa-results/browser.json',JSON.stringify({scope:'Chromium DOM + mocked Tauri IPC; not native Windows validation',results},null,2));

@@ -79,7 +79,7 @@ function render(next,force=false) {
 function baseState() { return latest.state==='WORK' && connected ? 'WORK' : roaming; }
 function settle() {
   if(alertRun) { render('ALERT'); return; }
-  if(!connected){render(qaDeferred?'IDLE':'CONNECTION_ERROR');return;}
+  if(!connected){render(qaDeferred?roaming:'CONNECTION_ERROR');return;}
   if(Date.now()<flashUntil) { render('SUCCESS'); return; }
   render(baseState());
 }
