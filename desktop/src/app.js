@@ -20,6 +20,24 @@ let movementTimer, behaviorTimer, bubbleTimer, maskTimer, moving=false, interact
 let maskBusy=false, maskDirty=false;
 let roaming='IDLE';
 let greetingTimer, greetingEndTimer, greetingActive=false, greetingSequence=0, activeGreetingSrc='';
+const idleMotions=['breathe','cheerful','thinking','surprised','greet','explain','note','delighted'];
+let idleMotion='breathe', idleMotionTimer;
+function setIdleMotion(name){
+  if(!idleMotions.includes(name))return;
+  idleMotion=name;
+  document.body.dataset.idleMotion=name;
+  const picker=$('#idle-motion');if(picker)picker.value=name;
+  if(state==='IDLE'&&!greetingActive)refreshMaskTimer();
+}
+function scheduleIdleMotion(){
+  clearTimeout(idleMotionTimer);
+  idleMotionTimer=setTimeout(()=>{
+    if(state==='IDLE'&&!greetingActive&&!interacting&&$('#settings').hidden){
+      setIdleMotion(idleMotions[Math.floor(Math.random()*idleMotions.length)]);
+    }
+    scheduleIdleMotion();
+  },6000+Math.random()*5000);
+}
 const greetingSrc=new URL('./shared/hina/assets/greeting.gif',import.meta.url).href;
 function playGreeting(){
   if(state!=='IDLE' || !displayAsset('IDLE').localIdleStyle || interacting || !$('#settings').hidden || greetingActive)return false;
@@ -52,6 +70,7 @@ function render(next,force=false) {
     document.body.dataset.state=state;startMovement();refreshMaskTimer();
   }
   document.body.classList.toggle('idle-breath',state==='IDLE'&&!!asset.localIdleStyle&&!greetingActive);
+  document.body.dataset.idleMotion=idleMotion;
   $('#character').style.transform=direction===-1?'scaleX(-1)':'';
 }
 
@@ -105,7 +124,7 @@ async function sendMask() {
   const pixels=Array.from({length:width*height},(_,i)=>rgba[i*4+3]>24?1:0);
   try { await invoke('hit_map',{pixels,width,height}); } catch(e) { settingsError(e); }
 }
-function refreshMaskTimer(){clearInterval(maskTimer);if(displayAsset(state).animated||greetingActive)maskTimer=setInterval(updateMask,250);}
+function refreshMaskTimer(){clearInterval(maskTimer);if(displayAsset(state).animated||greetingActive||(state==='IDLE'&&idleMotion!=='breathe'))maskTimer=setInterval(updateMask,250);}
 $('#character').onload=()=>{updateMask();refreshMaskTimer();};
 bindPetInput($('#pet'), {
   onClick:()=>invoke('open_office'),
@@ -121,6 +140,7 @@ function openSettings(){ $('#settings').hidden=false;pausedUntil=Date.now()+5000
 document.oncontextmenu=e=>{e.preventDefault();openSettings();};
 $('#close-settings').onclick=()=>{$('#settings').hidden=true;updateMask();};
 $('#exit').onclick=()=>invoke('quit');
+$('#idle-motion').onchange=e=>{setIdleMotion(e.target.value);render('IDLE',true);};
 for(const id of ['top','roam','notifications','size']) {
   const el=$('#'+id);if(id==='size')el.value=prefs[id];else el.checked=prefs[id];
   el.onchange=async()=>{
@@ -161,7 +181,7 @@ async function init(){
     await win.setAlwaysOnTop(prefs.top);await invoke('move_pet',{dx:0,bottom:true});await updateMask();await win.show();
     try{$('#autostart').checked=await invoke('autostart');}catch(e){settingsError(e);}
   } else settingsError('브라우저 미리보기: 이동·트레이·자동 실행·앱 알림은 Windows 앱에서 사용');
-  behavior();scheduleGreeting();poller.start();remoteAssets.start();
+  behavior();scheduleGreeting();scheduleIdleMotion();poller.start();remoteAssets.start();
 }
-window.addEventListener('beforeunload',()=>{remoteAssets.stop();poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);clearTimeout(greetingTimer);clearTimeout(greetingEndTimer);});
+window.addEventListener('beforeunload',()=>{remoteAssets.stop();poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);clearTimeout(greetingTimer);clearTimeout(greetingEndTimer);clearTimeout(idleMotionTimer);});
 init().catch(e=>{settingsError(e);openSettings();win?.show();});
