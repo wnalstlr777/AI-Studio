@@ -71,7 +71,7 @@ fn open_run(url: String, state: State<Runtime>) -> Result<(), String> {
     launch_target(url, &state)
 }
 #[tauri::command]
-async fn notify(app: tauri::AppHandle, state: State<Runtime>, url: String, failure: bool) -> Result<(), String> {
+async fn notify(app: tauri::AppHandle, state: State<'_, Runtime>, url: String, failure: bool) -> Result<(), String> {
     if !valid_url(&url) { return Err("Invalid Actions URL".into()); }
     // One app notification at a time; the frontend chooses failure before success.
     if let Some(old) = app.get_webview_window("notice") { old.destroy().map_err(|e| e.to_string())?; }
