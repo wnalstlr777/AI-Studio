@@ -6,6 +6,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { tmpdir } from 'node:os';
 import assert from 'node:assert/strict';
+import { remoteAssetChecks } from './remote-assets-browser.mjs';
 if(process.platform!=='win32')throw Error('Windows native QA requires Windows; this is not a passing browser fallback');
 const report={scope:'Real Windows Tauri executable + Win32 mouse; external browser launch recorded in QA mode',results:[]};
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -32,6 +33,7 @@ try{
   assert.ok(page,'Tauri WebView page missing');page.setDefaultTimeout(10000);
   await page.waitForURL(/^(https?:\/\/tauri\.localhost|tauri:\/\/localhost)/,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>!!window.__TAURI__?.core && document.querySelector('#pet'));
+  await context.route('https://wnalstlr777.github.io/**',route=>route.abort());
   let runs=[];await context.route('https://api.github.com/**',route=>route.fulfill({json:{workflow_runs:runs}}));
   await page.evaluate(()=>{localStorage.clear();localStorage.setItem('hina.settings',JSON.stringify({roam:false,notifications:false,top:true,size:200}));});
   await page.clock.install();await page.reload();
@@ -53,6 +55,13 @@ try{
   await clickOffice('click remains active immediately after native drag');
   const outside=await probe();mouse(outside.x+2,outside.y+2,null);await sleep(200);assert.equal((await probe()).ignored,true,'Transparent corner did not pass input through');
   await clickOffice('re-entry from transparent region recovers click');
+  await remoteAssetChecks(page,{scope:'Windows executable + WebView2 + real IndexedDB, mocked Pages HTTP',resultFile:'remote-assets-native.json',resetQA:()=>{runs=[];},onUpdatedInput:async()=>{
+    await clickOffice('native click after remote animation update');
+    const before=await probe(),position=await point();mouse(position.x,position.y,true);await sleep(200);
+    const after=await probe();assert.ok(Math.abs(after.x-before.x)+Math.abs(after.y-before.y)>10);assert.equal(after.clicks,before.clicks);
+    await clickOffice('native click after dragging remote animation');
+  }});
+  report.results.push({case:'remote update, validation, offline cache, previous/bundled fallback',status:'passed'});
   await page.evaluate(()=>{Math.random=()=>.5;const el=document.querySelector('#roam');el.checked=true;el.dispatchEvent(new Event('change'));});
   await page.clock.fastForward(31000);await page.waitForFunction(()=>document.body.dataset.state==='WALK');await clickOffice('native input after WALK transition');
   await page.evaluate(()=>Math.random=()=>.9);await page.clock.fastForward(31000);await page.waitForFunction(()=>document.body.dataset.state==='REST');await clickOffice('native input after REST transition');

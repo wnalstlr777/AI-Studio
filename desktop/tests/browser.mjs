@@ -5,6 +5,7 @@ import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { extname, resolve, sep } from 'node:path';
 import assert from 'node:assert/strict';
+import { remoteAssetChecks } from './remote-assets-browser.mjs';
 
 const root=fileURLToPath(new URL('../dist/',import.meta.url));
 const server=createServer(async(req,res)=>{
@@ -41,11 +42,12 @@ try{
     window.__calls=[];window.__random=0;Math.random=()=>window.__random;
     window.__TAURI__={core:{invoke:async(name,args)=>{window.__calls.push({name,args});return name==='move_pet'?1:false;}},event:{listen:async()=>()=>{}},window:{getCurrentWindow:()=>({setAlwaysOnTop:async()=>{},show:async()=>{}})}};
   });
-  let runs=[];await page.route('https://api.github.com/**',route=>route.fulfill({json:{workflow_runs:runs}}));
+  let runs=[];await page.route('https://wnalstlr777.github.io/**',route=>route.abort());
+  await page.route('https://api.github.com/**',route=>route.fulfill({json:{workflow_runs:runs}}));
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
   const state=async(name)=>page.waitForFunction(name=>document.body.dataset.state===name,name);
   await state('IDLE');await page.locator('#character').evaluate(img=>img.decode());
-  assert.ok((await page.locator('#character').getAttribute('src')).endsWith('/greeting.gif'));
+  assert.ok((await page.locator('#character').getAttribute('src')).endsWith('/secretary.png'));
   async function input(name){
     await state(name);const before=await page.evaluate(()=>window.__calls.filter(c=>c.name==='open_office').length);
     await page.locator('#pet').click();const box=await page.locator('#pet').boundingBox();
@@ -66,6 +68,7 @@ try{
   await page.locator('#bubble').click();assert.equal(await page.evaluate(()=>window.__calls.filter(c=>c.name==='open_run').at(-1).args.url),run.html_url);
   const mask=await page.evaluate(()=>window.__calls.filter(c=>c.name==='hit_map').at(-1)?.args);
   assert.ok(mask?.pixels.includes(0)&&mask.pixels.includes(1),'alpha mask must retain transparent and interactive areas');
+  await remoteAssetChecks(page,{onUpdatedInput:()=>input('IDLE'),resetQA:()=>{runs=[];}});
   assert.deepEqual(errors,[]);
   await mkdir('qa-results',{recursive:true});await page.screenshot({path:'qa-results/desktop-browser.png',omitBackground:true});
   await writeFile('qa-results/browser.json',JSON.stringify({scope:'Chromium DOM + mocked Tauri IPC; not native Windows validation',results},null,2));

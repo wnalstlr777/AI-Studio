@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "version": "2026.11.06.1",
+  "assets": {
+    "IDLE": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": true
+    },
+    "WALK": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    },
+    "REST": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    },
+    "WORK": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    },
+    "SUCCESS": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    },
+    "ALERT": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    }
+  }
+}

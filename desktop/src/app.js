@@ -1,10 +1,16 @@
 import { bindPetInput } from './input.js';
 import { QAPoller, EventLedger, snapshot, classify, messages, runUrl } from './shared/hina/state.js';
-import { assetFor } from './shared/hina/assets.js';
+import { RemoteAssets } from './shared/hina/remote-assets.js';
+import bundledManifest from './shared/hina/bundled-manifest.js';
 const $ = s => document.querySelector(s);
 const native = window.__TAURI__;
 const invoke = (name,args={}) => native ? native.core.invoke(name,args) : Promise.resolve(name==='move_pet'?direction:false);
 const win = native?.window.getCurrentWindow();
+const remoteAssets=new RemoteAssets({bundledManifest,
+  onChange(){greetingActive=false;clearTimeout(greetingEndTimer);render(state,true);scheduleGreeting();},
+  onStatus(info){const el=$('#asset-update-status');el.dataset.kind=info.kind;el.dataset.version=info.version||'';el.dataset.source=info.source;el.textContent=info.kind==='error'?`에셋 ${info.version||'기본'} · 확인 실패, 현재 에셋 유지`:`에셋 ${info.version||'기본'} · ${info.source==='bundled'?'앱 내장':'정상 캐시/원격'}`;},
+});
+const displayAsset=state=>remoteAssets.getAsset(state);
 function read(key,fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
 let prefs = { top:true,roam:true,notifications:true,size:200,...read('hina.settings',{}) };
 prefs.size=Math.min(240,Math.max(140,Number(prefs.size)||200));
@@ -17,8 +23,9 @@ let greetingTimer, greetingEndTimer, greetingActive=false;
 const greetingSrc=new URL('./shared/hina/assets/greeting.gif',import.meta.url).href;
 function scheduleGreeting(){
   clearTimeout(greetingTimer);
+  if(!displayAsset('IDLE').localIdleStyle)return;
   greetingTimer=setTimeout(()=>{
-    if(state==='IDLE' && !interacting && $('#settings').hidden){
+    if(state==='IDLE' && displayAsset(state).localIdleStyle && !interacting && $('#settings').hidden){
       greetingActive=true;
       document.body.classList.remove('idle-breath');
       $('#character').src=greetingSrc;
@@ -34,16 +41,17 @@ function showBubble(text,timeout=0) {
   if(timeout) bubbleTimer=setTimeout(()=>showBubble(''),timeout);
 }
 function render(next,force=false) {
-  if(state!==next || force || !$('#character').src) {
-    if(next!=='IDLE'){greetingActive=false;clearTimeout(greetingEndTimer);}
-
-    state=next; const asset=assetFor(state); if($('#character').src!==asset.src)$('#character').src=asset.src; $('#asset-status').textContent=asset.label;
-    document.body.dataset.state=state;
-    startMovement();
+  const asset=displayAsset(next);
+  if(next!=='IDLE'){greetingActive=false;clearTimeout(greetingEndTimer);}
+  const src=greetingActive&&next==='IDLE'&&asset.localIdleStyle?greetingSrc:asset.src;
+  if(state!==next || force || $('#character').src!==src) {
+    state=next;if($('#character').src!==src)$('#character').src=src;$('#asset-status').textContent=asset.label;
+    document.body.dataset.state=state;startMovement();refreshMaskTimer();
   }
-  document.body.classList.toggle('idle-breath',state==='IDLE' && !greetingActive);
+  document.body.classList.toggle('idle-breath',state==='IDLE'&&!!asset.localIdleStyle&&!greetingActive);
   $('#character').style.transform=direction===-1?'scaleX(-1)':'';
 }
+
 function baseState() { return latest.state==='WORK' && connected ? 'WORK' : roaming; }
 function settle() {
   if(!connected) return;
@@ -94,7 +102,8 @@ async function sendMask() {
   const pixels=Array.from({length:width*height},(_,i)=>rgba[i*4+3]>24?1:0);
   try { await invoke('hit_map',{pixels,width,height}); } catch(e) { settingsError(e); }
 }
-$('#character').onload=()=>{ updateMask(); clearInterval(maskTimer); if(assetFor(state).animated) maskTimer=setInterval(updateMask,250); };
+function refreshMaskTimer(){clearInterval(maskTimer);if(displayAsset(state).animated||greetingActive)maskTimer=setInterval(updateMask,250);}
+$('#character').onload=()=>{updateMask();refreshMaskTimer();};
 bindPetInput($('#pet'), {
   onClick:()=>invoke('open_office'),
   onDrag:()=>invoke('drag_pet'),
@@ -149,7 +158,7 @@ async function init(){
     await win.setAlwaysOnTop(prefs.top);await invoke('move_pet',{dx:0,bottom:true});await updateMask();await win.show();
     try{$('#autostart').checked=await invoke('autostart');}catch(e){settingsError(e);}
   } else settingsError('브라우저 미리보기: 이동·트레이·자동 실행·앱 알림은 Windows 앱에서 사용');
-  behavior();scheduleGreeting();poller.start();
+  behavior();scheduleGreeting();poller.start();remoteAssets.start();
 }
-window.addEventListener('beforeunload',()=>{poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);clearTimeout(greetingTimer);clearTimeout(greetingEndTimer);});
+window.addEventListener('beforeunload',()=>{remoteAssets.stop();poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);clearTimeout(greetingTimer);clearTimeout(greetingEndTimer);});
 init().catch(e=>{settingsError(e);openSettings();win?.show();});
