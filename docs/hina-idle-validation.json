@@ -215,5 +215,22 @@
     "headSha": "8789d480e4cd162327ca25a8da09b0baedec11c0",
     "conclusion": "success",
     "duration": "24s"
+  },
+  "hotfix121": {
+    "commit": "0db2b6a0d8a5dee9c42ee1ebd78364c3790a3dd1",
+    "nodeTests": 29,
+    "browserTests": 17,
+    "windowsRun": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42193891413",
+    "conclusion": "success",
+    "duration": "5m 13s",
+    "installerArtifact": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42193891413/artifacts/13490783540",
+    "installerZipSha256": "97b3ad8e51410566cf6e1c8d638484c85fb8cb87f48d5e78f2051accdd02a523",
+    "nativeCases": [
+      "all eight bundled WebP motions decode in the EXE during HTTP 403",
+      "local random review works during 403",
+      "restart cooldown suppresses repeated API requests",
+      "existing click/drag/QA/asset cache regressions"
+    ],
+    "userPCVerified": false
   }
 }
