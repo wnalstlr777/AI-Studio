@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2026.11.06.2",
+  "version": "2026.11.06.3",
   "assets": {
     "IDLE": {
       "file": "secretary.png",
@@ -13,8 +13,8 @@
     "WALK": {
       "file": "walk.gif",
       "format": "gif",
-      "bytes": 620549,
-      "sha256": "291857730d01531be9525d761884e4e78999e735accd7f1be0d351298c74da0c",
+      "bytes": 812044,
+      "sha256": "268af6f27a8d0095bf8df2c4ba32f7c2871192813c5e13df612719c4d86934ec",
       "animated": true,
       "complete": true
     },
