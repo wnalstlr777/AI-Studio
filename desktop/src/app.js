@@ -1,3 +1,4 @@
+import { bindPetInput } from './input.js';
 import { QAPoller, EventLedger, snapshot, classify, messages, runUrl } from './shared/hina/state.js';
 import { assetFor } from './shared/hina/assets.js';
 const $ = s => document.querySelector(s);
@@ -9,7 +10,8 @@ let prefs = { top:true,roam:true,notifications:true,size:200,...read('hina.setti
 prefs.size=Math.min(240,Math.max(140,Number(prefs.size)||200));
 let ledger = new EventLedger(read('hina.events',{}));
 let latest = { state:'IDLE',run:null }, state='IDLE', direction=1, alertRun=null, flashUntil=0, pausedUntil=0, connected=false;
-let movementTimer, behaviorTimer, bubbleTimer, maskTimer, moving=false, dragStart=null, dragged=false;
+let movementTimer, behaviorTimer, bubbleTimer, maskTimer, moving=false, interacting=false;
+let maskBusy=false, maskDirty=false;
 let roaming='IDLE';
 function showBubble(text,timeout=0) {
   clearTimeout(bubbleTimer); $('#bubble').textContent=text; $('#bubble').hidden=!text;
@@ -18,7 +20,7 @@ function showBubble(text,timeout=0) {
 }
 function render(next) {
   if(state!==next || !$('#character').src) {
-    state=next; const asset=assetFor(state); $('#character').src=asset.src; $('#asset-status').textContent=asset.label;
+    state=next; const asset=assetFor(state); if($('#character').src!==asset.src)$('#character').src=asset.src; $('#asset-status').textContent=asset.label;
     document.body.dataset.state=state;
     startMovement();
   }
@@ -35,7 +37,7 @@ function startMovement() {
   clearInterval(movementTimer);
   if(!native || !prefs.roam || roaming!=='WALK' || state!=='WALK') return;
   movementTimer=setInterval(async()=>{
-    if(moving || state!=='WALK' || !$('#settings').hidden || Date.now()<pausedUntil) return;
+    if(moving || interacting || state!=='WALK' || !$('#settings').hidden || Date.now()<pausedUntil) return;
     moving=true;
     try { const before=direction;direction=await invoke('move_pet',{dx:direction*2,bottom:true}); $('#character').style.transform=direction===-1?'scaleX(-1)':'';if(before!==direction)updateMask(); }
     catch(error) { settingsError(error); }
@@ -49,7 +51,14 @@ function behavior() {
 }
 function settingsError(e) { $('#settings-error').textContent=String(e); }
 async function updateMask() {
-  if(!native) return;
+  if(!native)return;
+  maskDirty=true;if(maskBusy)return;
+  maskBusy=true;
+  try{while(maskDirty){maskDirty=false;await sendMask();}}
+  catch(error){settingsError(error);}
+  finally{maskBusy=false;}
+}
+async function sendMask() {
   const width=160,height=210, canvas=document.createElement('canvas'); canvas.width=width;canvas.height=height;
   const ctx=canvas.getContext('2d',{willReadFrequently:true});
   ctx.scale(width/innerWidth,height/innerHeight);
@@ -67,19 +76,13 @@ async function updateMask() {
   const pixels=Array.from({length:width*height},(_,i)=>rgba[i*4+3]>24?1:0);
   try { await invoke('hit_map',{pixels,width,height}); } catch(e) { settingsError(e); }
 }
-$('#character').onload=()=>{ updateMask(); clearInterval(maskTimer); if(assetFor(state).complete) maskTimer=setInterval(updateMask,250); };
-$('#pet').onpointerdown=e=>{ if(e.button!==0)return; dragStart={x:e.screenX,y:e.screenY};dragged=false; pausedUntil=Date.now()+5000; };
-$('#pet').onpointermove=async e=>{
-  if(!dragStart || dragged || !(e.buttons&1))return;
-  if(Math.hypot(e.screenX-dragStart.x,e.screenY-dragStart.y)<5)return;
-  dragged=true; dragStart=null;
-  try { await invoke('drag_lock'); await win?.startDragging(); } catch(error) { settingsError(error); }
-};
-$('#pet').onclick=()=>{
-  dragStart=null;if(dragged){dragged=false;return;}
-  const status=connected?(latest.run?`Sea QA: ${latest.state} (${latest.run.conclusion||latest.run.status})`:'Sea QA 실행 기록 없음'):messages.CONNECTION_ERROR;
-  showBubble(status+'\n실제 AI 에이전트 상태는 미연결'+(latest.run?'\n클릭하여 Actions 열기':''),10000);
-};
+$('#character').onload=()=>{ updateMask(); clearInterval(maskTimer); if(assetFor(state).animated) maskTimer=setInterval(updateMask,250); };
+bindPetInput($('#pet'), {
+  onClick:()=>invoke('open_office'),
+  onDrag:()=>invoke('drag_pet'),
+  onActivity(active){interacting=active;pausedUntil=Date.now()+5000;},
+  onError:settingsError,
+});
 $('#bubble').onclick=async()=>{
   const url=runUrl(alertRun||latest.run);if(url)try { await invoke('open_run',{url}); }catch(e){settingsError(e);}
   alertRun=null;flashUntil=0;showBubble('');settle();
