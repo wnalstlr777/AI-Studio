@@ -1,15 +1,25 @@
-# MS 사무실 — 히나 Desktop Pet v1.0.1 Windows 빌드
+# MS 사무실 — 히나 Desktop Pet v1.1.0 Windows 빌드
 
 Windows 전용 별도 Tauri 2 앱이다. Sea/HINA 게임 코드는 변경하지 않는다.
 `../shared/hina/`의 상태·에셋 정의를 대시보드와 공유하고 실행 코드는 분리한다.
 
 ## 설치 파일 다운로드
 
-[Windows x64 설치 파일 Artifact](https://github.com/wnalstlr777/AI-Studio/actions/runs/42162388912/artifacts/13477537744)
-(GitHub 로그인 필요). ZIP을 풀고 `히나 비서_1.0.1_x64-setup.exe`를 실행한다.
+[Windows x64 설치 파일 Artifact](https://github.com/wnalstlr777/AI-Studio/actions/runs/42167051536/artifacts/13480230497)
+(GitHub 로그인 필요). ZIP을 풀고 `히나 비서_1.1.0_x64-setup.exe`를 실행한다.
 2026-11-06 Windows Actions에서 빌드·업로드 성공. Artifact 보관 기한: 2026-12-06.
 코드 서명은 하지 않았다. 실제 Windows 실행 파일의 자동 입력 검수는 통과했다.
 설치 마법사와 사용자 PC 환경의 동작은 사용자 확인이 필요하다. 기존 히나를 종료한 뒤 설치한다.
+
+## 재설치 없는 애니메이션 업데이트
+
+**이 버전은 최초 한 번 설치해야 한다.** 이후에는 파일과 manifest만 main에 반영하면
+앱 시작 시/실행 중 10분마다 자동 확인한다. 변경 없는 파일은 다시 받지 않는다.
+다운로드·SHA-256·형식·크기·디코딩·캐시 저장을 완료한 뒤만 교체하며 실패하면 현재 정상 에셋을 유지한다.
+캐시 손상 시 이전 정상 버전, 최종적으로 앱 내장 에셋으로 대체한다.
+
+[원격 에셋 업로드·버전 갱신 안내](../docs/hina-remote-assets.md) ·
+[공개 manifest](https://wnalstlr777.github.io/AI-Studio/shared/hina/assets/manifest.json)
 
 ## 소스에서 실행 (Windows 10/11)
 
@@ -25,8 +35,8 @@ npm run build
 ```
 
 Windows 빌드 워크플로 `.github/workflows/hina-desktop.yml`은 수동 실행과
-`hina-desktop-v1` / `hina-input-qa-v1.0.1` 브랜치의 앱 소스 push를 지원한다.
-main 반영은 PR #2로 완료했다. 수동 `reuse_run_id`는 앱 소스가 완전히 같은 경우에만
+`hina-desktop-v1` / `hina-input-qa-v1.0.1` / `hina-remote-assets-v1` 브랜치의 앱 소스 push를 지원한다.
+원격 업데이트 main 반영은 PR #3로 완료했다. 수동 `reuse_run_id`는 앱 소스가 완전히 같은 경우에만
 기존 실행 파일로 네이티브 QA를 재실행하며, 소스가 다르면 중단한다.
 
 UI만 확인: `npm run preview` → http://127.0.0.1:1420.
@@ -76,7 +86,7 @@ UI만 확인: `npm run preview` → http://127.0.0.1:1420.
 임시 SVG는 제거했으며 원본 바이트를 재생성·수정하지 않았다.
 
 - `shared/hina/assets/greeting.gif`: 512×512, 6프레임, 각 280ms, 총 1.68초, 무한 반복.
-  모든 합성 프레임의 투명 알파·외곽·체커보드 표시를 확인했다. IDLE 인사 모션으로 사용한다.
+  모든 합성 프레임의 투명 알파·외곽·체커보드 표시를 확인했다. 기본 IDLE에서 가끔 인사할 때 사용한다.
 - `shared/hina/assets/secretary.png`: 1145×1373 RGBA 원본.
   WALK/REST/WORK/SUCCESS/ALERT에서는 이 그림과 **전용 모션 미제작** 표시를 사용한다.
   상태 전환 테스트 통과는 이들 전용 애니메이션 제작 완료를 의미하지 않는다.
@@ -90,7 +100,22 @@ UI만 확인: `npm run preview` → http://127.0.0.1:1420.
 알파 검사: `python scripts/audit-asset.py FILE` (Pillow 필요).
 `npm run prepare:ui`로 웹과 같은 에셋을 앱 UI에 복사한다.
 
-## 검증 기록 (v1.0.1)
+## 원격 업데이트 검증 (v1.1.0)
+
+- [Windows 빌드·전체 자동 QA](https://github.com/wnalstlr777/AI-Studio/actions/runs/42167051536): 성공.
+  소스 `7976323cdc931f941227f46ee6e57ec50ccb5915`. x64 NSIS 생성·Artifact 업로드 성공.
+- [QA 결과](https://github.com/wnalstlr777/AI-Studio/actions/runs/42167051536/artifacts/13480305304):
+  Node 기존 7개 + 업데이트 8개, Rust 2개, 브라우저·Windows 네이티브 입력 회귀 통과.
+- 브라우저 및 실제 Windows 실행 파일에서 각각 실제 IndexedDB·이미지 디코더를 사용해
+  새 버전 적용, 변경 파일만 받기, 잘못된 파일 차단, 끊김 복구, 오프라인 재시작,
+  손상된 현재 캐시 → 이전 정상 → 내장 에셋 대체를 확인했다.
+- Windows Win32 마우스로 원격 업데이트 후 클릭·드래그·다시 클릭 및 기존 상태 전환·알림·종료를 확인했다.
+- 자동 QA의 원격 HTTP 응답은 모의하고 10분 주기는 가상 시계로 확인했다.
+  실제 GitHub Pages 배포 후 공개 HTTPS manifest 내용·CORS 헤더와 배포된 파일 해시를 별도 확인했다.
+- 설치 마법사 실행, 사용자 PC 기본 브라우저 실행, 장시간 상주·자원 사용·다중 모니터는 별도 확인 대상이다.
+- 기존 Sea QA 코드와 웹 대시보드 실행 코드는 변경하지 않았다.
+
+## 이전 검증 기록 (v1.0.1)
 
 - [Windows 설치 파일 빌드·업로드](https://github.com/wnalstlr777/AI-Studio/actions/runs/42162388912):
   x64 Release / NSIS 생성 성공. 빌드 소스 `6612b70b08cf44e2917f9b009ee7c7e29b1c2370`.
@@ -118,6 +143,6 @@ UI만 확인: `npm run preview` → http://127.0.0.1:1420.
 ## 사용자 확인 순서
 
 1. 기존 히나를 트레이에서 종료한다. 먹통이면 작업 관리자에서 `hina-desktop.exe`를 종료한다.
-2. 위 Artifact의 ZIP을 풀고 `히나 비서_1.0.1_x64-setup.exe`를 실행한다.
+2. 위 Artifact의 ZIP을 풀고 `히나 비서_1.1.0_x64-setup.exe`를 실행한다.
 3. 실제 히나 표시·주변 클릭 통과·드래그 후 클릭·MS 사무실 열기를 확인한다.
 4. 오류 알림에서 해당 Actions 기록이 열리는지, 트레이 종료 후 앱이 끝나는지 확인한다.
