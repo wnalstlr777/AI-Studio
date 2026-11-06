@@ -3,8 +3,8 @@ import {test,expect} from '@playwright/test';
 test('Sea loads without fatal page errors and exposes the aquaculture UI',async({page},testInfo)=>{
  const errors=[];
  page.on('pageerror',e=>errors.push(e.message));
- const response=await page.goto('/',{waitUntil:'domcontentloaded'});
- expect(response?.ok(),'Sea must respond successfully').toBeTruthy();
+ const response=await page.goto('./',{waitUntil:'domcontentloaded'});
+ expect(response?.ok(),`Sea must respond successfully (URL: ${page.url()}, HTTP: ${response?.status()??'no response'})`).toBeTruthy();
  await expect(page.locator('canvas').first()).toBeVisible({timeout:30000});
  await expect(page.locator('#whale-summon')).toHaveCount(1);
  await expect(page.locator('.aqua-school-label')).toHaveCount(2);
