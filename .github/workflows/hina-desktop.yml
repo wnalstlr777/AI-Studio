@@ -8,7 +8,7 @@ on:
         default: ''
         type: string
   push:
-    branches: [hina-desktop-v1, hina-input-qa-v1.0.1, hina-remote-assets-v1]
+    branches: [main, hina-desktop-v1, hina-input-qa-v1.0.1, hina-remote-assets-v1]
     paths:
       - 'desktop/**'
       - 'shared/hina/**'
