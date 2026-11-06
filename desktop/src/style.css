@@ -5,22 +5,18 @@ body.idle-breath #character{animation:hina-idle-breathe 3.4s ease-in-out infinit
 @keyframes hina-idle-breathe{0%,100%{translate:0 0;scale:1 1}50%{translate:0 -2px;scale:1.008 1.006}}
 @media (prefers-reduced-motion:reduce){body.idle-breath #character{animation:none}}
 
-/* Eight synchronized idle behavior previews use ONE original illustration and one fixed canvas.
-   These are lightweight motion treatments, not independently redrawn skeletal poses. */
-body.idle-breath #character{animation-name:hina-idle-breathe}
-body.idle-breath[data-idle-motion="cheerful"] #character{animation:hina-cheerful 1.8s ease-in-out infinite}
-body.idle-breath[data-idle-motion="thinking"] #character{animation:hina-thinking 3s ease-in-out infinite}
-body.idle-breath[data-idle-motion="surprised"] #character{animation:hina-surprised 2.6s ease-out infinite}
-body.idle-breath[data-idle-motion="greet"] #character{animation:hina-greet 2.2s ease-in-out infinite}
-body.idle-breath[data-idle-motion="explain"] #character{animation:hina-explain 2.5s ease-in-out infinite}
-body.idle-breath[data-idle-motion="note"] #character{animation:hina-note 2.6s ease-in-out infinite}
-body.idle-breath[data-idle-motion="delighted"] #character{animation:hina-delighted 1.9s ease-in-out infinite}
-@keyframes hina-cheerful{0%,100%{translate:0 0;scale:1}40%{translate:0 -5px;scale:1.02}70%{translate:0 -2px;scale:1.008}}
-@keyframes hina-thinking{0%,100%{rotate:0deg;translate:0 0}45%{rotate:-2deg;translate:0 -1px}75%{rotate:1deg}}
-@keyframes hina-surprised{0%,18%,100%{scale:1;translate:0 0}23%{scale:1.055;translate:0 -7px}34%{scale:.985;translate:0 1px}}
-@keyframes hina-greet{0%,100%{rotate:0deg;translate:0 0}30%{rotate:3deg;translate:0 -3px}65%{rotate:-2deg;translate:0 -1px}}
-@keyframes hina-explain{0%,100%{translate:0 0;rotate:0deg}30%{translate:2px -2px;rotate:1deg}65%{translate:-2px -2px;rotate:-1deg}}
-@keyframes hina-note{0%,100%{translate:0 0;rotate:0deg}25%{translate:0 2px;rotate:1deg}50%{translate:0 0;rotate:0deg}75%{translate:0 2px;rotate:1deg}}
-@keyframes hina-delighted{0%,100%{translate:0 0;scale:1}25%{translate:0 -7px;scale:1.025}50%{translate:0 0;scale:1}75%{translate:0 -4px;scale:1.012}}
-#idle-motion{min-width:120px;background:#254357;color:#eaf2fa;border:1px solid #5b7b92;border-radius:6px;padding:4px}
-@media (prefers-reduced-motion:reduce){body.idle-breath[data-idle-motion] #character{animation:none}}
+/* Real frame animations share the exact image box and hit-mask coordinates. */
+#motion-canvas{position:absolute;top:0;left:0;width:100%;height:calc(100% - 30px);object-fit:contain;pointer-events:none}
+#idle-motion{max-width:145px;background:#254357;color:#eaf2fa;border:1px solid #5b7b92;border-radius:6px;padding:4px}
+#settings{max-height:calc(100% - 20px);overflow:auto;overscroll-behavior:contain}
+#settings fieldset{border:1px solid #5b7b92;border-radius:8px;margin:12px 0;padding:8px}
+#settings fieldset p{font-size:11px;line-height:1.5;color:#b7cbd8}
+.motion-actions{display:flex;flex-wrap:wrap;gap:6px}
+#settings .motion-actions button{padding:5px 7px;font-size:11px}
+body.motion-guides #pet{background:repeating-conic-gradient(#adb9c380 0% 25%,#fff4 0% 50%) 0/16px 16px}
+body.motion-guides #pet::after{content:"";position:absolute;pointer-events:none;left:0;right:0;bottom:31px;border-top:1px solid #e77656}
+body.motion-guides #pet::before{content:"";position:absolute;pointer-events:none;top:0;bottom:30px;left:50%;border-left:1px solid #e77656}
+#inspection-bar{position:absolute;top:6px;left:6px;right:6px;display:flex;justify-content:center;gap:5px;z-index:4;background:#122435e8;padding:6px;border-radius:8px}
+#inspection-bar button{background:#254357;border:1px solid #5b7b92;border-radius:5px;padding:7px}
+body.motion-inspect #pet{width:280px!important;height:366px!important}
+body.motion-inspect #bubble{display:none}

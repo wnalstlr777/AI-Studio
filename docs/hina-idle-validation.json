@@ -1,0 +1,202 @@
+{
+  "scope": "Linux Chromium and Node 22.23.4; not Windows native QA",
+  "nodeTests": {
+    "qa": 9,
+    "remoteAssets": 8,
+    "idlePlayer": 5,
+    "idleManifest": 4
+  },
+  "idleBrowser": {
+    "scope": "Chromium real WebP decoder/canvas/IndexedDB, Tauri IPC mocked; not Windows native QA",
+    "cases": [
+      "IDLE_NORMAL: decoded frames change pixels",
+      "IDLE_HAPPY: decoded frames change pixels",
+      "IDLE_THINK: decoded frames change pixels",
+      "IDLE_SURPRISE: decoded frames change pixels",
+      "IDLE_GREETING: decoded frames change pixels",
+      "IDLE_EXPLAIN: decoded frames change pixels",
+      "IDLE_NOTE: decoded frames change pixels",
+      "IDLE_CHEER: decoded frames change pixels",
+      "pause freezes actual raster; resume advances",
+      "valid v2 commits; false frame count/duration and legacy-state hash alias rejected before atomic activation",
+      "new canvas: click/drag/click and alpha mask",
+      "QA WORK preempts manual Idle and blocks replacement",
+      "connection failure preserves unacknowledged QA ALERT"
+    ],
+    "atomic": [
+      {
+        "variant": "valid",
+        "activated": true,
+        "commits": 1,
+        "lastError": ""
+      },
+      {
+        "variant": "frames",
+        "activated": false,
+        "commits": 0,
+        "lastError": "Motion frame count mismatch"
+      },
+      {
+        "variant": "duration",
+        "activated": false,
+        "commits": 0,
+        "lastError": "Motion duration mismatch"
+      },
+      {
+        "variant": "state-alias",
+        "activated": false,
+        "commits": 0,
+        "lastError": "Motion canvas mismatch"
+      }
+    ],
+    "status": "passed"
+  },
+  "legacyBrowser": {
+    "scope": "Chromium DOM + mocked Tauri IPC; not native Windows validation",
+    "results": [
+      {
+        "case": "IDLE: click/drag/next click",
+        "status": "passed",
+        "scope": "browser mock IPC"
+      },
+      {
+        "case": "WALK: click/drag/next click",
+        "status": "passed",
+        "scope": "browser mock IPC"
+      },
+      {
+        "case": "REST: click/drag/next click",
+        "status": "passed",
+        "scope": "browser mock IPC"
+      },
+      {
+        "case": "WORK: click/drag/next click",
+        "status": "passed",
+        "scope": "browser mock IPC"
+      },
+      {
+        "case": "ALERT: click/drag/next click",
+        "status": "passed",
+        "scope": "browser mock IPC"
+      },
+      {
+        "case": "IDLE: click/drag/next click",
+        "status": "passed",
+        "scope": "browser mock IPC"
+      }
+    ]
+  },
+  "art": {
+    "scope": "Decoded WebP data and alpha geometry, not art approval or Windows native QA",
+    "originals": {
+      "secretary.png": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "greeting.gif": "c39c3d6b47b9f5286b8c28bdce820119a6f6410a305161f50671e09b2151f437",
+      "walk.gif": "268af6f27a8d0095bf8df2c4ba32f7c2871192813c5e13df612719c4d86934ec"
+    },
+    "motions": [
+      {
+        "id": "IDLE_NORMAL",
+        "frames": 31,
+        "durationMs": 3200,
+        "firstFootY": 610,
+        "minFootY": 610,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0.5633970378664495,
+          "alphaDifferences": 0
+        }
+      },
+      {
+        "id": "IDLE_HAPPY",
+        "frames": 24,
+        "durationMs": 2400,
+        "firstFootY": 610,
+        "minFootY": 610,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0.36524391795602607,
+          "alphaDifferences": 0
+        }
+      },
+      {
+        "id": "IDLE_THINK",
+        "frames": 29,
+        "durationMs": 3000,
+        "firstFootY": 610,
+        "minFootY": 610,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0.30855769883279044,
+          "alphaDifferences": 0
+        }
+      },
+      {
+        "id": "IDLE_SURPRISE",
+        "frames": 11,
+        "durationMs": 2000,
+        "firstFootY": 610,
+        "minFootY": 610,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0.33434276601520085,
+          "alphaDifferences": 0
+        }
+      },
+      {
+        "id": "IDLE_GREETING",
+        "frames": 28,
+        "durationMs": 2800,
+        "firstFootY": 610,
+        "minFootY": 610,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0.5041681511264929,
+          "alphaDifferences": 0
+        }
+      },
+      {
+        "id": "IDLE_EXPLAIN",
+        "frames": 30,
+        "durationMs": 3000,
+        "firstFootY": 610,
+        "minFootY": 610,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0.6242047536644951,
+          "alphaDifferences": 0
+        }
+      },
+      {
+        "id": "IDLE_NOTE",
+        "frames": 32,
+        "durationMs": 3200,
+        "firstFootY": 610,
+        "minFootY": 610,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0.5084858085640608,
+          "alphaDifferences": 0
+        }
+      },
+      {
+        "id": "IDLE_CHEER",
+        "frames": 24,
+        "durationMs": 2400,
+        "firstFootY": 610,
+        "minFootY": 609,
+        "maxFootY": 610,
+        "seam": {
+          "rgbMeanAbsoluteError": 0,
+          "alphaDifferences": 0
+        }
+      }
+    ]
+  },
+  "unrun": [
+    "Windows build",
+    "Windows native QA",
+    "live Pages deployment and asset update on user PC"
+  ],
+  "artApproved": false,
+  "published": false
+}

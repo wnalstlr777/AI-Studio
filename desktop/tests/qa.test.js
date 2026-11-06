@@ -41,3 +41,14 @@ test('default fetch preserves the browser global receiver',async()=>{
   let called=false;const p=new QAPoller({onResult:()=>{called=true;},onError:e=>{throw e;}});
   try{await p.start();assert.equal(called,true);}finally{p.stop();globalThis.fetch=original;}
 });
+
+test('connection diagnostics distinguish limits, permissions, 404, and timeout',async()=>{
+ for(const [status,headers,kind,pattern] of [[403,{'x-ratelimit-remaining':'0'},'rate-limit',/한도/],[403,{},'http',/접근 거부/],[401,{},'http',/인증/],[404,{},'http',/워크플로/],[429,{'retry-after':'120'},'rate-limit',/한도/]]){
+  let failure;const p=new QAPoller({onResult:()=>assert.fail(),onError:e=>failure=e,fetcher:async()=>new Response('',{status,headers})});
+  try{await p.start();assert.equal(failure.kind,kind);assert.match(failure.message,pattern);assert.ok(failure.retryAt>Date.now());}finally{p.stop();}
+ }
+});
+test('a stopped poll cannot deliver an in-flight result',async()=>{
+ let finish,called=false;const p=new QAPoller({onResult:()=>called=true,onError:()=>assert.fail(),fetcher:()=>new Promise(r=>finish=r)});
+ const pending=p.start();p.stop();finish(Response.json({workflow_runs:[]}));await pending;assert.equal(called,false);
+});

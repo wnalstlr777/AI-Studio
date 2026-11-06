@@ -1,6 +1,6 @@
 {
   "name": "hina-desktop",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -8,9 +8,10 @@
     "build": "tauri build",
     "prepare:ui": "node scripts/build.mjs",
     "preview": "node scripts/serve.mjs",
-    "test": "node tests/qa.test.js && node tests/remote-assets.test.js",
+    "test": "node tests/qa.test.js && node tests/remote-assets.test.js && node tests/idle-player.test.js && node tests/idle-manifest.test.js",
     "test:browser": "node tests/browser.mjs",
-    "test:native": "node tests/native.mjs"
+    "test:native": "node tests/native.mjs",
+    "test:idle-browser": "node tests/idle-browser.mjs"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.8.0",

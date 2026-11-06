@@ -33,8 +33,10 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
       - run: node scripts/validate-asset-manifest.mjs
+      - run: node scripts/validate-asset-manifest.mjs idle-manifest.json
       - run: npm test
       - run: npm run test:browser
+      - run: npm run test:idle-browser
       - run: npm run prepare:ui
       - name: Rust input lock and alpha mapping tests
         run: |

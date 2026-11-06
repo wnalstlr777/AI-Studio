@@ -1,6 +1,11 @@
 export const STATES=['IDLE','WALK','REST','WORK','SUCCESS','ALERT'];
 export const ASSET_BASE='https://wnalstlr777.github.io/AI-Studio/shared/hina/assets/';
 export const MANIFEST_URL=ASSET_BASE+'manifest.json';
+// A separate endpoint keeps v1.1 clients compatible with the original six-state pack.
+export const IDLE_MANIFEST_URL=ASSET_BASE+'idle-manifest.json';
+export const MOTIONS=['IDLE_NORMAL','IDLE_HAPPY','IDLE_THINK','IDLE_SURPRISE','IDLE_GREETING','IDLE_EXPLAIN','IDLE_NOTE','IDLE_CHEER'];
+// Verify motion constraints first even when a legacy state references the same bytes.
+export const assetEntries=manifest=>[...Object.values(manifest.motions||{}),...Object.values(manifest.assets)];
 export const CHECK_INTERVAL=600000;
 export const MAX_FILE_BYTES=8*1024*1024;
 export const MAX_PACK_BYTES=24*1024*1024;
@@ -8,11 +13,13 @@ export const MAX_MANIFEST_BYTES=64*1024;
 export const mimeFor=format=>format==='apng'?'image/png':`image/${format}`;
 const fail=message=>{throw new Error(message);};
 export function normalizeManifest(value){
-  if(!value || value.schemaVersion!==1 || typeof value.version!=='string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(value.version))fail('Invalid manifest version');
+  if(!value || ![1,2].includes(value.schemaVersion) || typeof value.version!=='string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/.test(value.version))fail('Invalid manifest version');
   if(!value.assets || Object.keys(value.assets).length!==STATES.length || Object.keys(value.assets).some(s=>!STATES.includes(s)))fail('All six asset states are required');
-  const hashes=new Map(),files=new Map(),assets={};
-  for(const state of STATES){
-    const a=value.assets[state];
+  if(value.schemaVersion===1&&value.motions)fail('Motions require schema 2');
+  if(value.schemaVersion===2&&(!value.motions||Object.keys(value.motions).length!==MOTIONS.length||Object.keys(value.motions).some(s=>!MOTIONS.includes(s))))fail('All eight idle motions are required');
+  const hashes=new Map(),files=new Map(),assets={},motions={};
+  for(const state of [...STATES,...(value.schemaVersion===2?MOTIONS:[])]){
+    const motion=MOTIONS.includes(state),a=motion?value.motions[state]:value.assets[state];
     if(!a || typeof a.file!=='string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,95}\.(gif|png|apng|webp)$/.test(a.file))fail('Invalid asset filename');
     if(!['gif','png','apng','webp'].includes(a.format) || !a.file.endsWith('.'+a.format))fail('Invalid asset format');
     if(!Number.isSafeInteger(a.bytes) || a.bytes<16 || a.bytes>MAX_FILE_BYTES)fail('Invalid asset size');
@@ -20,11 +27,19 @@ export function normalizeManifest(value){
     if(typeof a.animated!=='boolean' || typeof a.complete!=='boolean')fail('Invalid animation flags');
     if(files.has(a.file)&&files.get(a.file)!==a.sha256)fail('Conflicting file hashes');
     if(hashes.has(a.sha256)&&(hashes.get(a.sha256).bytes!==a.bytes||hashes.get(a.sha256).format!==a.format))fail('Conflicting asset metadata');
-    assets[state]={file:a.file,format:a.format,bytes:a.bytes,sha256:a.sha256,animated:a.animated,complete:a.complete};
+    const prior=hashes.get(a.sha256);
+    if(prior?.frames&&a.frames&&['frames','durationMs','width','height'].some(key=>prior[key]!==a[key]))fail('Conflicting motion metadata');
+    const entry={file:a.file,format:a.format,bytes:a.bytes,sha256:a.sha256,animated:a.animated,complete:a.complete};
+    if(motion){
+      if(!a.animated||!Number.isSafeInteger(a.frames)||a.frames<2||a.frames>240||!Number.isSafeInteger(a.durationMs)||a.durationMs<200||a.durationMs>15000||typeof a.loop!=='boolean')fail('Invalid motion timing');
+      if(a.width!==512||a.height!==614||a.footY!==610||a.centerX!==256)fail('Inconsistent motion alignment');
+      Object.assign(entry,{frames:a.frames,durationMs:a.durationMs,loop:a.loop,width:a.width,height:a.height,footY:a.footY,centerX:a.centerX});
+    }
+    (motion?motions:assets)[state]=entry;
     files.set(a.file,a.sha256);hashes.set(a.sha256,a);
   }
   if([...hashes.values()].reduce((n,a)=>n+a.bytes,0)>MAX_PACK_BYTES)fail('Asset pack is too large');
-  return {schemaVersion:1,version:value.version,assets};
+  return {schemaVersion:value.schemaVersion,version:value.version,assets,...(value.schemaVersion===2?{motions}:{})};
 }
 export const manifestKey=manifest=>JSON.stringify(normalizeManifest(manifest));
 export function assetURL(entry){

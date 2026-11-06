@@ -2,7 +2,7 @@ import { readFile,mkdir,writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 const base=new URL('../../shared/hina/assets/',import.meta.url);
-const bundled=JSON.parse(await readFile(new URL('manifest.json',base),'utf8'));
+const bundled=JSON.parse(await readFile(new URL('idle-manifest.json',base),'utf8'));
 const gif=await readFile(new URL('greeting.gif',base));
 const gif3=Buffer.concat([gif.subarray(0,-1),Buffer.from([33,254,2,118,51,0,59])]);
 const entry=(file,b)=>({file,format:'gif',bytes:b.length,sha256:createHash('sha256').update(b).digest('hex'),animated:true,complete:true});
@@ -14,7 +14,7 @@ export async function remoteAssetChecks(page,{onUpdatedInput,resetQA=()=>{},scop
   await page.route('https://wnalstlr777.github.io/**',route=>{
     if(offline)return route.abort();
     const headers={'access-control-allow-origin':'*'};
-    if(route.request().url().endsWith('/manifest.json'))return route.fulfill({json:manifest,headers});
+    if(route.request().url().endsWith('/idle-manifest.json'))return route.fulfill({json:manifest,headers});
     downloads++;return route.fulfill({body:bad?gif:(route.request().url().endsWith('v3.gif')?gif3:gif),contentType:'image/gif',headers});
   });
   resetQA();await page.evaluate(()=>{localStorage.clear();localStorage.setItem('hina.settings',JSON.stringify({roam:false,notifications:false,top:true,size:200}));});
@@ -40,7 +40,7 @@ export async function remoteAssetChecks(page,{onUpdatedInput,resetQA=()=>{},scop
   offline=true;await page.reload();await ready('qa-v3','cache');cases.push('offline restart loads persistent verified cache');
   async function corrupt(hash){
     await page.evaluate(hash=>new Promise((resolve,reject)=>{
-      const r=indexedDB.open('hina-animation-cache-v1',1);r.onerror=()=>reject(r.error);r.onsuccess=()=>{
+      const r=indexedDB.open('hina-animation-cache-v2',1);r.onerror=()=>reject(r.error);r.onsuccess=()=>{
         const db=r.result,tx=db.transaction('blobs','readwrite');tx.objectStore('blobs').put(new Blob(['broken'],{type:'image/gif'}),hash);
         tx.oncomplete=()=>{db.close();resolve();};tx.onabort=()=>reject(tx.error);
       };

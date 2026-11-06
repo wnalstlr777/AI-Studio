@@ -1,0 +1,176 @@
+{
+  "schemaVersion": 2,
+  "version": "2026.11.06-idle-review.1",
+  "assets": {
+    "IDLE": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": true
+    },
+    "WALK": {
+      "file": "walk.gif",
+      "format": "gif",
+      "bytes": 812044,
+      "sha256": "268af6f27a8d0095bf8df2c4ba32f7c2871192813c5e13df612719c4d86934ec",
+      "animated": true,
+      "complete": true
+    },
+    "REST": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    },
+    "WORK": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    },
+    "SUCCESS": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    },
+    "ALERT": {
+      "file": "secretary.png",
+      "format": "png",
+      "bytes": 1184573,
+      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+      "animated": false,
+      "complete": false
+    }
+  },
+  "motions": {
+    "IDLE_NORMAL": {
+      "frames": 31,
+      "durationMs": 3200,
+      "loop": true,
+      "file": "idle-normal-v1.webp",
+      "format": "webp",
+      "bytes": 1268790,
+      "sha256": "2e217e677cb8cc8a24444cad053c81bc39a7fee619da4c6594e5ac0ac825c75d",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    "IDLE_HAPPY": {
+      "frames": 24,
+      "durationMs": 2400,
+      "loop": false,
+      "file": "idle-happy-v1.webp",
+      "format": "webp",
+      "bytes": 1234350,
+      "sha256": "aaf54666c99aae4136423462c3ef3e6af1e59adf12164cc75fd851da38a443fe",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    "IDLE_THINK": {
+      "frames": 29,
+      "durationMs": 3000,
+      "loop": false,
+      "file": "idle-think-v1.webp",
+      "format": "webp",
+      "bytes": 1297898,
+      "sha256": "c47d42f58237758532a81612bba77fdf80d639db45f00312e02f551b3e502507",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    "IDLE_SURPRISE": {
+      "frames": 11,
+      "durationMs": 2000,
+      "loop": false,
+      "file": "idle-surprise-v1.webp",
+      "format": "webp",
+      "bytes": 534490,
+      "sha256": "084033575d67127d008a053c5e11a2e031ff94396aafb8337ee5f4a7f543dc6f",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    "IDLE_GREETING": {
+      "frames": 28,
+      "durationMs": 2800,
+      "loop": false,
+      "file": "idle-greeting-v1.webp",
+      "format": "webp",
+      "bytes": 1199106,
+      "sha256": "4f5d7d8f6b432b88317af0a34119a92104104d77c8f119f2fb5b6c7bc8ba8ed5",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    "IDLE_EXPLAIN": {
+      "frames": 30,
+      "durationMs": 3000,
+      "loop": false,
+      "file": "idle-explain-v1.webp",
+      "format": "webp",
+      "bytes": 1334060,
+      "sha256": "d71fe0fbad0ffc7dfd7d1af6434f2029c6f710200681028cca45f7de89e21d5d",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    "IDLE_NOTE": {
+      "frames": 32,
+      "durationMs": 3200,
+      "loop": false,
+      "file": "idle-note-v1.webp",
+      "format": "webp",
+      "bytes": 1497740,
+      "sha256": "b28c823ed52cbda5a6227bc540dbf7a17a618201fac39766088bee8aed3845d7",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    "IDLE_CHEER": {
+      "frames": 24,
+      "durationMs": 2400,
+      "loop": false,
+      "file": "idle-cheer-v1.webp",
+      "format": "webp",
+      "bytes": 1316804,
+      "sha256": "b46ce04e7532aa63e6564e2891645aa137bf39e0d035fcc9c621ba883ddc50b2",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    }
+  }
+}

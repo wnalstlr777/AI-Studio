@@ -7,6 +7,7 @@ import { normalizeManifest,verifyBytes,MANIFEST_URL,ASSET_BASE,CHECK_INTERVAL,MA
 const root=new URL('../../shared/hina/assets/',import.meta.url);
 const bundled=JSON.parse(await readFile(new URL('manifest.json',root),'utf8'));
 const png=new Uint8Array(await readFile(new URL('secretary.png',root)));
+const walk=new Uint8Array(await readFile(new URL('walk.gif',root)));
 const gif=new Uint8Array(await readFile(new URL('greeting.gif',root)));
 const entry=(file,bytes,format='gif')=>({file,format,bytes:bytes.length,sha256:createHash('sha256').update(bytes).digest('hex'),animated:format==='gif',complete:true});
 // A valid GIF comment changes the fixture version, without changing any character pixels.
@@ -19,7 +20,7 @@ class MemoryStore{
   async commit(manifest,blobs,previous){if(this.failCommit)throw Error('disk full');for(const [k,b]of blobs)this.blobs.set(k,b);this.meta.set('current',structuredClone(manifest));this.meta.set('previous',structuredClone(previous));}
 }
 function harness({store=new MemoryStore()}={}){
-  const h={manifest:structuredClone(bundled),files:new Map([['secretary.png',png],['greeting.gif',gif],['idle-v2.gif',gif]]),calls:[],offline:false,badFile:null,store,status:[]};
+  const h={manifest:structuredClone(bundled),files:new Map([['secretary.png',png],['greeting.gif',gif],['walk.gif',walk],['idle-v2.gif',gif]]),calls:[],offline:false,badFile:null,store,status:[]};
   h.updater=new RemoteAssets({bundledManifest:bundled,store,decode:async()=>({}),onStatus:s=>h.status.push(s),fetcher:async(url,options)=>{
     h.calls.push(url);assert.equal(options.redirect,'error');assert.equal(options.credentials,'omit');
     if(url===MANIFEST_URL){if(h.offline)throw Error('offline');return Response.json(h.manifest);}

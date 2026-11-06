@@ -1,0 +1,237 @@
+{
+  "source": "shared/hina/assets/secretary.png",
+  "width": 1145,
+  "height": 1373,
+  "output": {
+    "width": 512,
+    "height": 614,
+    "centerX": 256,
+    "footY": 610
+  },
+  "parts": [
+    {
+      "id": "legs",
+      "pivot": [
+        595,
+        1050
+      ],
+      "z": 0,
+      "provenance": "original, legs/shoes kept together; crossed hidden leg unresolved",
+      "path": "M 460 1024 L 724 1040 L 703 1165 L 645 1280 L 630 1373 L 410 1373 L 418 1220 L 480 1110 Z"
+    },
+    {
+      "id": "torso",
+      "pivot": [
+        610,
+        900
+      ],
+      "z": 1,
+      "provenance": "original jacket/skirt; covered chest restored separately",
+      "path": "M 546 599 L 600 575 L 686 601 L 784 646 L 796 720 L 758 866 L 777 940 L 735 1080 L 474 1080 L 430 994 L 424 915 L 456 853 L 401 804 L 395 688 Z"
+    },
+    {
+      "id": "clipboardArm",
+      "pivot": [
+        467,
+        680
+      ],
+      "z": 3,
+      "provenance": "original clipboard, sleeve, hand as one coupled part; covered fingers unresolved",
+      "path": "M 354 653 L 492 610 L 513 632 L 561 620 L 615 718 L 657 819 L 648 839 L 583 851 L 473 879 L 397 857 L 384 823 L 405 779 Z"
+    },
+    {
+      "id": "upperArm",
+      "pivot": [
+        772,
+        667
+      ],
+      "z": 2,
+      "provenance": "original right jacket sleeve",
+      "path": "M 762 637 L 802 624 L 842 586 L 891 622 L 891 681 L 837 725 L 792 729 L 755 693 Z"
+    },
+    {
+      "id": "hand",
+      "pivot": [
+        844,
+        622
+      ],
+      "z": 4,
+      "provenance": "original palm/forearm; wrist overlap kept",
+      "path": "M 823 618 L 847 560 L 879 526 L 895 501 L 945 477 L 958 486 L 949 507 L 1014 517 L 1024 550 L 1013 567 L 946 572 L 904 600 L 883 646 L 846 640 Z"
+    },
+    {
+      "id": "head",
+      "pivot": [
+        618,
+        585
+      ],
+      "z": 5,
+      "provenance": "original hair, face, glasses and earrings together; no separate hidden back hair claimed",
+      "path": "M 110 0 L 960 0 L 963 477 L 884 479 L 866 523 L 824 568 L 775 593 L 706 603 L 666 581 L 609 582 L 555 603 L 499 615 L 440 630 L 400 654 L 303 658 L 130 612 Z"
+    }
+  ],
+  "faceRestoration": {
+    "file": "shared/hina/rig/face-restoration.png",
+    "provenance": "AI restored open eyes and closed smile; only facial interior patches used; requires identity review"
+  },
+  "restoration": {
+    "file": "shared/hina/rig/torso-restoration.png",
+    "provenance": "AI-restored torso reference; only masked covered chest patch is used; review required",
+    "sourceRect": [
+      390,
+      600,
+      380,
+      575
+    ],
+    "targetRect": [
+      395,
+      591,
+      390,
+      496
+    ],
+    "mask": "M 403 661 L 505 631 L 580 661 L 637 822 L 570 859 L 424 847 Z"
+  },
+  "unresolved": [
+    "Hidden back hair and open-eye facial reconstruction are not original pixels.",
+    "Crossed legs and clipboard fingers are not independently separated.",
+    "Restored chest/shoulder seams require art approval; all eight motions remain drafts."
+  ],
+  "motions": [
+    {
+      "id": "IDLE_NORMAL",
+      "label": "기본 대기",
+      "frames": 31,
+      "durationMs": 3200,
+      "loop": true,
+      "file": "idle-normal-v1.webp",
+      "format": "webp",
+      "bytes": 1268790,
+      "sha256": "2e217e677cb8cc8a24444cad053c81bc39a7fee619da4c6594e5ac0ac825c75d",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    {
+      "id": "IDLE_HAPPY",
+      "label": "행복",
+      "frames": 24,
+      "durationMs": 2400,
+      "loop": false,
+      "file": "idle-happy-v1.webp",
+      "format": "webp",
+      "bytes": 1234350,
+      "sha256": "aaf54666c99aae4136423462c3ef3e6af1e59adf12164cc75fd851da38a443fe",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    {
+      "id": "IDLE_THINK",
+      "label": "생각",
+      "frames": 29,
+      "durationMs": 3000,
+      "loop": false,
+      "file": "idle-think-v1.webp",
+      "format": "webp",
+      "bytes": 1297898,
+      "sha256": "c47d42f58237758532a81612bba77fdf80d639db45f00312e02f551b3e502507",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    {
+      "id": "IDLE_SURPRISE",
+      "label": "놀람",
+      "frames": 11,
+      "durationMs": 2000,
+      "loop": false,
+      "file": "idle-surprise-v1.webp",
+      "format": "webp",
+      "bytes": 534490,
+      "sha256": "084033575d67127d008a053c5e11a2e031ff94396aafb8337ee5f4a7f543dc6f",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    {
+      "id": "IDLE_GREETING",
+      "label": "인사",
+      "frames": 28,
+      "durationMs": 2800,
+      "loop": false,
+      "file": "idle-greeting-v1.webp",
+      "format": "webp",
+      "bytes": 1199106,
+      "sha256": "4f5d7d8f6b432b88317af0a34119a92104104d77c8f119f2fb5b6c7bc8ba8ed5",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    {
+      "id": "IDLE_EXPLAIN",
+      "label": "설명",
+      "frames": 30,
+      "durationMs": 3000,
+      "loop": false,
+      "file": "idle-explain-v1.webp",
+      "format": "webp",
+      "bytes": 1334060,
+      "sha256": "d71fe0fbad0ffc7dfd7d1af6434f2029c6f710200681028cca45f7de89e21d5d",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    {
+      "id": "IDLE_NOTE",
+      "label": "메모",
+      "frames": 32,
+      "durationMs": 3200,
+      "loop": false,
+      "file": "idle-note-v1.webp",
+      "format": "webp",
+      "bytes": 1497740,
+      "sha256": "b28c823ed52cbda5a6227bc540dbf7a17a618201fac39766088bee8aed3845d7",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    },
+    {
+      "id": "IDLE_CHEER",
+      "label": "기쁨",
+      "frames": 24,
+      "durationMs": 2400,
+      "loop": false,
+      "file": "idle-cheer-v1.webp",
+      "format": "webp",
+      "bytes": 1316804,
+      "sha256": "b46ce04e7532aa63e6564e2891645aa137bf39e0d035fcc9c621ba883ddc50b2",
+      "animated": true,
+      "complete": false,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
+    }
+  ]
+}
