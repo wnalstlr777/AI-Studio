@@ -50,7 +50,7 @@ jobs:
           $source = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:REUSE_RUN_ID" --jq '.head_sha'
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           git fetch --depth=1 origin $source
-          git diff --exit-code $source HEAD -- src scripts src-tauri ../../shared/hina
+          git diff --exit-code $source HEAD -- src scripts src-tauri ../shared/hina
           if ($LASTEXITCODE -ne 0) { throw 'Production sources differ from the reused executable' }
       - uses: actions/download-artifact@v4
         if: inputs.reuse_run_id != ''
