@@ -13,17 +13,34 @@ let latest = { state:'IDLE',run:null }, state='IDLE', direction=1, alertRun=null
 let movementTimer, behaviorTimer, bubbleTimer, maskTimer, moving=false, interacting=false;
 let maskBusy=false, maskDirty=false;
 let roaming='IDLE';
+let greetingTimer, greetingEndTimer, greetingActive=false;
+const greetingSrc=new URL('./shared/hina/assets/greeting.gif',import.meta.url).href;
+function scheduleGreeting(){
+  clearTimeout(greetingTimer);
+  greetingTimer=setTimeout(()=>{
+    if(state==='IDLE' && !interacting && $('#settings').hidden){
+      greetingActive=true;
+      $('#character').src=greetingSrc;
+      clearTimeout(greetingEndTimer);
+      greetingEndTimer=setTimeout(()=>{greetingActive=false;render(state,true);},1680);
+    }
+    scheduleGreeting();
+  },22000+Math.random()*18000);
+}
 function showBubble(text,timeout=0) {
   clearTimeout(bubbleTimer); $('#bubble').textContent=text; $('#bubble').hidden=!text;
   updateMask();
   if(timeout) bubbleTimer=setTimeout(()=>showBubble(''),timeout);
 }
-function render(next) {
-  if(state!==next || !$('#character').src) {
+function render(next,force=false) {
+  if(state!==next || force || !$('#character').src) {
+    if(next!=='IDLE'){greetingActive=false;clearTimeout(greetingEndTimer);}
+
     state=next; const asset=assetFor(state); if($('#character').src!==asset.src)$('#character').src=asset.src; $('#asset-status').textContent=asset.label;
     document.body.dataset.state=state;
     startMovement();
   }
+  document.body.classList.toggle('idle-breath',state==='IDLE' && !greetingActive);
   $('#character').style.transform=direction===-1?'scaleX(-1)':'';
 }
 function baseState() { return latest.state==='WORK' && connected ? 'WORK' : roaming; }
@@ -131,7 +148,7 @@ async function init(){
     await win.setAlwaysOnTop(prefs.top);await invoke('move_pet',{dx:0,bottom:true});await updateMask();await win.show();
     try{$('#autostart').checked=await invoke('autostart');}catch(e){settingsError(e);}
   } else settingsError('브라우저 미리보기: 이동·트레이·자동 실행·앱 알림은 Windows 앱에서 사용');
-  behavior();poller.start();
+  behavior();scheduleGreeting();poller.start();
 }
-window.addEventListener('beforeunload',()=>{poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);});
+window.addEventListener('beforeunload',()=>{poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);clearTimeout(greetingTimer);clearTimeout(greetingEndTimer);});
 init().catch(e=>{settingsError(e);openSettings();win?.show();});
