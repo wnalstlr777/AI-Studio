@@ -27,3 +27,17 @@ test('Sea network activity diagnostic',async({page},testInfo)=>{
   console.log('SEA NETWORK DIAGNOSTIC',JSON.stringify(report));
   expect(requests.length,'No network requests recorded').toBeGreaterThan(0);
 });
+
+test('Sea performance preset regression',async({page})=>{
+  const response=await page.goto('./',{waitUntil:'domcontentloaded'});
+  expect(response?.ok()).toBeTruthy();
+  await page.waitForFunction(()=>Boolean(window.oceanCruise?.renderer&&window.oceanCruise?.params),{timeout:20000});
+  const result=await page.evaluate(()=>{
+    const {renderer,params}=window.oceanCruise;
+    return {pixelRatio:renderer.getPixelRatio(),reflectionResolution:params.reflectionResolution,quality:document.querySelector('#graphics-quality')?.value};
+  });
+  console.log('SEA PERFORMANCE PRESET',JSON.stringify(result));
+  expect(result.quality).toBe('medium');
+  expect(result.reflectionResolution).toBeLessThanOrEqual(256);
+  expect(result.pixelRatio).toBeLessThanOrEqual(1.25);
+});
