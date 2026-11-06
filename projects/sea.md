@@ -16,3 +16,9 @@ GitHub Actions에서 Playwright로 Sea 웹 게임을 실행하고 PC·모바일 
 - Playwright 기본 실행 검수 및 GitHub Actions 설정 완료
 - 말풍선 거리·가림·겹침에 대한 자동 회귀 검수는 아직 미구현
 - 실제 테스트 성공 여부는 GitHub Actions 실행 결과로 확인해야 함
+
+## 성능 및 네트워크 QA
+- 적용 규칙: `rules/performance-network.md`
+- 진단 테스트: `tests/sea-network.spec.js`
+- Sea 실행 중 다른 탭의 동영상 버퍼링 제보가 있어 네트워크 요청·실패·WebSocket 활동을 자동 기록한다.
+- 유튜브 버퍼링의 원인은 아직 미확인이다. 실제 재현 및 시스템 자원 검수는 별도로 진행한다.
