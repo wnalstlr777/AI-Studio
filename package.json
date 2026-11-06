@@ -1,0 +1,11 @@
+{
+  "name": "ai-studio-qa",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:sea": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}
