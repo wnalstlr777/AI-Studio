@@ -1,6 +1,6 @@
-# HINA SURVIVAL — project configuration
+# HINA SURVIVAL — 프로젝트별 설정
 
-- Engine: Three.js (current browser implementation)
-- Follow shared rules when applicable.
-- Project-specific survival AI and UI requirements belong here, not in generic rules.
-- Repository link and automated test hooks must be verified before configuring CI.
+- **엔진:** 현재 브라우저 버전은 Three.js 기반
+- **공통 규칙:** 적용 가능한 항목은 `rules/`의 공통 규칙을 따른다.
+- **프로젝트 전용 규칙:** 생존 AI, 행동, 상태 및 전용 UI 규칙은 이 파일 또는 프로젝트별 문서에서 관리한다.
+- **자동 검수 연결:** 저장소 주소와 테스트용 제어 기능을 확인한 뒤 GitHub Actions 연동을 설정한다.
