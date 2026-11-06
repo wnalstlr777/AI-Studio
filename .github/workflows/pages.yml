@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'shared/hina/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 permissions:
@@ -27,3 +28,4 @@ jobs:
           path: '.'
       - id: deployment
         uses: actions/deploy-pages@v4
+
