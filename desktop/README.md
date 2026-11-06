@@ -1,9 +1,16 @@
-# MS 사무실 — 히나 Desktop Pet v1.0 구현 초안
+# MS 사무실 — 히나 Desktop Pet v1.0 Windows 빌드
 
 Windows 전용 별도 Tauri 2 앱이다. Sea/HINA 게임 코드는 변경하지 않는다.
 `../shared/hina/`의 상태·에셋 정의를 대시보드와 공유하고 실행 코드는 분리한다.
 
-## 실행 (Windows 10/11)
+## 설치 파일 다운로드
+
+[Windows x64 설치 파일 Artifact](https://github.com/wnalstlr777/AI-Studio/actions/runs/42157315192/artifacts/13474458702)
+(GitHub 로그인 필요). ZIP을 풀고 `히나 비서_1.0.0_x64-setup.exe`를 실행한다.
+2026-11-06 Windows Actions에서 빌드·업로드 성공. Artifact 보관 기한: 2026-12-06.
+코드 서명은 하지 않았다. Windows 설치·실제 동작 검증은 사용자가 진행한다.
+
+## 소스에서 실행 (Windows 10/11)
 
 Node.js 22 LTS 이상, Rust stable MSVC, Visual Studio C++ Build Tools와 Windows SDK,
 Microsoft Edge WebView2 Runtime을 설치한다. [Tauri 준비 사항](https://v2.tauri.app/start/prerequisites/)
@@ -16,9 +23,9 @@ npm run dev
 npm run build
 ```
 
-수동 Windows 빌드 워크플로 `.github/workflows/hina-desktop.yml`도 추가했다.
-워크플로는 실행하거나 배포하지 않았다. 이 환경에는 Rust/Windows가 없어 exe를 생성하지 못했다.
-이 소스는 Windows에서 빌드·실행 검증을 거치기 전까지 완성 릴리스가 아니다.
+Windows 빌드 워크플로 `.github/workflows/hina-desktop.yml`은 수동 실행과
+`hina-desktop-v1` 브랜치의 앱 소스 push를 지원한다. main 반영은 PR #1로 완료했다.
+빌드 성공과 실제 Windows 실행 검증은 별개이며, 후자는 아직 미검수다.
 
 UI만 확인: `npm run preview` → http://127.0.0.1:1420.
 브라우저에서는 OS 이동·드래그·트레이·자동 실행·앱 알림이 작동하지 않는다.
@@ -77,17 +84,28 @@ IDLE 포함 6종 모두 `complete: false`, 전용 애니메이션 미제작으�
    검수가 끝난 상태만 `complete: true`로 변경한다. 웹·앱이 동일 파일을 사용한다.
 5. `npm run prepare:ui`로 배포용 UI를 다시 복사한다.
 
-## 검증 기록
+## 검증 기록 (2차 작업)
 
-- 통과: Node 핵심 로직 테스트 6개, JS 문법, 정적 UI 복사 빌드.
-- Tauri CLI 설치 및 설정 탐지 확인. Rust·Cargo가 없어 네이티브 컴파일 미검수.
-- Windows 실행/설치/클릭 통과/드래그/다중 모니터·DPI/자동 실행/알림 클릭/종료 후 프로세스/
-  CPU·GPU 실측은 미검수. Windows 빌드 후 이 항목을 짧게 확인해야 한다.
-- 원본 GIF 알파 및 전용 6종 애니메이션 미검수/미제작.
-- Chromium 화면 캡처는 환경에서 시간 초과되어 실제 화면 검수 미완료.
-- 원격 저장소 push, 운영 병합, GitHub Pages 배포는 하지 않았다.
+- [최종 Windows 빌드](https://github.com/wnalstlr777/AI-Studio/actions/runs/42157315192): 성공.
+  소스 커밋 `e42b04955df3510f487e44c3b92a8f540123d96a`.
+- x64 Release `hina-desktop.exe` 및 NSIS `히나 비서_1.0.0_x64-setup.exe` 생성 확인.
+- Artifact `hina-desktop-windows`, ID `13474458702`, 2,014,655 bytes, 업로드 성공.
+  ZIP SHA-256: `f344232be1013b1364ae1509fbee2a8cd9e3998f510e4d241d214cadff6bb7b3`.
+- [PR #1](https://github.com/wnalstlr777/AI-Studio/pull/1) main 병합 완료.
+- Node 핵심 로직 테스트 7개, 정적 UI 복사 빌드 통과.
+- Chromium PC(1280px)/모바일(390px) 레이아웃·제목·QA 성공 표시·연결 오류 구분 통과.
+  GitHub 응답은 테스트용 데이터로 주입했으며 실제 Sea 게임 QA 통과를 의미하지 않는다.
+- 브라우저 점검에서 확인한 fetch receiver 오류를 공유 모듈에서 수정했다.
+- 기존 Sea QA 워크플로·테스트 파일·게임 소스는 변경하지 않았다. Sea 게임 QA는 재실행하지 않았다.
+- Windows 설치/실행/클릭 통과/드래그/다중 모니터·DPI/자동 실행/알림 클릭/종료 후 프로세스/
+  CPU·GPU 실측은 미검수이며 사용자 확인이 필요하다.
+- 원본 GIF 알파 및 전용 6종 애니메이션은 미검수/미제작. 기존 임시 SVG 유지.
 
-저장소 다운로드가 셸 프록시에서 실패해 GitHub 연결 도구로 원본 커밋
-`c420066bbc3704264f8570b9eb628e1b7b740145`의 파일을 로컬에 재구성했다.
-로컬 Git의 첫 커밋은 이 스냅샷을 가져온 기록이며 원격 Git 이력의 연속이 아니다.
-원격에 반영할 때는 실제 저장소 브랜치에 변경 diff만 적용한다.
+## 사용자 확인 순서
+
+1. 위 Artifact에서 ZIP을 다운로드하고 설치 파일을 실행한다.
+2. 히나 표시·배경 투명·주변 클릭 통과·드래그·이동을 확인한다.
+3. 트레이 설정, 항상 위/자유 이동/크기/알림/자동 실행 설정을 확인한다.
+4. QA 조회·Actions 링크·새 이벤트 알림을 확인한다 (최초 조회는 과거 이벤트를 호출하지 않는다).
+5. 트레이에서 종료한 뒤 히나 프로세스가 정리되는지 확인한다.
+6. 실제 GIF 전달 후 에셋 검수·교체를 진행한다.
