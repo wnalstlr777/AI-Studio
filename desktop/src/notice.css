@@ -1,0 +1,1 @@
+body{margin:0;background:#182b3b;color:white;font:15px system-ui;display:flex;height:100vh}button{background:transparent;color:inherit;border:0;cursor:pointer;font:inherit}#open{flex:1;padding:20px;text-align:left;white-space:pre-line}#close{width:36px;align-self:start;padding:10px}
