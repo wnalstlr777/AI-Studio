@@ -34,6 +34,26 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           .\input-tests.exe
       - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hina-desktop-windows
+          path: desktop/src-tauri/target/release/bundle/nsis/*.exe
+          if-no-files-found: error
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hina-native-test-executable
+          path: desktop/src-tauri/target/release/hina-desktop.exe
+          retention-days: 7
+      - name: Ensure WebView2 runtime for native executable QA
+        run: |
+          $runtime = Get-ChildItem "${env:ProgramFiles(x86)}\Microsoft\EdgeWebView\Application\*\msedgewebview2.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if (-not $runtime) {
+            $installer = Join-Path $env:RUNNER_TEMP 'MicrosoftEdgeWebview2Setup.exe'
+            Invoke-WebRequest 'https://go.microsoft.com/fwlink/p/?LinkId=2124703' -OutFile $installer
+            $install = Start-Process $installer -ArgumentList '/silent /install' -Wait -PassThru
+            if ($install.ExitCode -ne 0) { throw "WebView2 runtime setup failed: $($install.ExitCode)" }
+          }
       - run: npm run test:native
       - uses: actions/upload-artifact@v4
         if: always()
@@ -41,9 +61,3 @@ jobs:
           name: hina-qa-results
           path: desktop/qa-results/
           if-no-files-found: warn
-      - uses: actions/upload-artifact@v4
-        with:
-          name: hina-desktop-windows
-          path: desktop/src-tauri/target/release/bundle/nsis/*.exe
-          if-no-files-found: error
-          retention-days: 30

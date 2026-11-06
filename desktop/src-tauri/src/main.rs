@@ -122,6 +122,12 @@ fn move_pet(window: tauri::WebviewWindow, dx: f64, bottom: bool) -> Result<i32, 
 #[tauri::command]
 fn quit(app: tauri::AppHandle) { app.exit(0); }
 fn main() {
+    let mut context=tauri::generate_context!();
+    if qa_mode() {
+        for window in &mut context.config_mut().app.windows {
+            window.additional_browser_args=Some("--remote-debugging-port=9222".into());
+        }
+    }
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app,_,_| { if let Some(w)=app.get_webview_window("main") { let _=move_pet(w.clone(),0.,true); let _=w.show(); } }))
         .plugin(tauri_plugin_autostart::Builder::new().build())
@@ -164,5 +170,5 @@ fn main() {
                 }
             });
             Ok(())
-        }).run(tauri::generate_context!()).expect("히나 비서 실행 실패");
+        }).run(context).expect("히나 비서 실행 실패");
 }

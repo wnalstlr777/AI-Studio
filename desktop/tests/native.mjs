@@ -51,23 +51,32 @@ try{
   await clickOffice('click remains active immediately after native drag');
   const outside=await probe();mouse(outside.x+2,outside.y+2,null);await sleep(200);assert.equal((await probe()).ignored,true,'Transparent corner did not pass input through');
   await clickOffice('re-entry from transparent region recovers click');
+  await page.evaluate(()=>{Math.random=()=>.5;const el=document.querySelector('#roam');el.checked=true;el.dispatchEvent(new Event('change'));});
+  await page.clock.fastForward(31000);await page.waitForFunction(()=>document.body.dataset.state==='WALK');await clickOffice('native input after WALK transition');
+  await page.evaluate(()=>Math.random=()=>.9);await page.clock.fastForward(31000);await page.waitForFunction(()=>document.body.dataset.state==='REST');await clickOffice('native input after REST transition');
+  await page.evaluate(()=>{const el=document.querySelector('#roam');el.checked=false;el.dispatchEvent(new Event('change'));});
   const run={id:525252,run_attempt:1,status:'in_progress',conclusion:null,created_at:new Date(Date.now()+86400000).toISOString(),html_url:'https://github.com/wnalstlr777/AI-Studio/actions/runs/525252'};
   runs=[run];await page.clock.fastForward(120001);await page.waitForFunction(()=>document.body.dataset.state==='WORK');await clickOffice('native input after WORK transition');
   runs=[{...run,status:'completed',conclusion:'failure'}];await page.clock.fastForward(120001);await page.waitForFunction(()=>document.body.dataset.state==='ALERT');await clickOffice('native input after ALERT transition');
   const bubble=await point('#bubble');mouse(bubble.x,bubble.y);await page.waitForFunction(url=>window.__TAURI__.core.invoke('qa_probe').then(p=>p.last_url===url),run.html_url);
   report.results.push({case:'native QA error bubble opens exact run target',status:'passed'});
+  await clickOffice('office target before notification');
   await page.evaluate(url=>window.__TAURI__.core.invoke('notify',{url,failure:true}),run.html_url);
   let notice;for(let i=0;i<30;i++){notice=context.pages().find(p=>p.url().includes('notice.html'));if(notice)break;await sleep(100);}
   assert.ok(notice,'Native notification window missing');await notice.waitForLoadState('domcontentloaded');
   // Notification click is dispatched in the real WebView. Main character uses Win32 mouse above.
-  await notice.locator('#open').click();await sleep(150);assert.equal((await probe()).last_url,run.html_url);
+  await notice.locator('#open').click();await page.waitForFunction(url=>window.__TAURI__.core.invoke('qa_probe').then(p=>p.last_url===url),run.html_url);
   report.results.push({case:'native notification click targets exact Actions run',status:'passed'});
   await page.screenshot({path:await mkdir('qa-results',{recursive:true}).then(()=> 'qa-results/windows-native.png')});
   await page.evaluate(()=>window.__TAURI__.core.invoke('quit')).catch(()=>{});
   for(let i=0;i<50&&exitCode===undefined;i++)await sleep(100);
   assert.equal(exitCode,0,'App failed to terminate cleanly');report.results.push({case:'native app exit',status:'passed'});
   report.status='passed';console.log('PASS Windows native input, drag recovery, alpha pass-through, state transitions, QA links, exit');
-}catch(error){report.status='failed';report.error=error.stack;throw error;}
+ }catch(error){
+  report.status='failed';report.error=error.stack;
+  try { report.diagnostics=execFileSync('powershell.exe',['-NoProfile','-Command',"Get-Process hina-desktop,msedgewebview2 -ErrorAction SilentlyContinue | Select-Object Id,SessionId,ProcessName,MainWindowTitle,Path | ConvertTo-Json; Get-NetTCPConnection -LocalPort 9222 -ErrorAction SilentlyContinue | Select-Object LocalAddress,LocalPort,State | ConvertTo-Json"],{encoding:'utf8',timeout:15000});console.error(report.diagnostics); }catch{}
+  throw error;
+}
 finally{
   await mkdir('qa-results',{recursive:true});await writeFile('qa-results/windows-native.json',JSON.stringify(report,null,2));
   await browser?.close().catch(()=>{});
