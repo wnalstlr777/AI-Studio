@@ -1,0 +1,126 @@
+{
+  "greeting.gif": {
+    "source_file": "Cheerful Chibi Office Greeting Animation.gif",
+    "sha256": "c39c3d6b47b9f5286b8c28bdce820119a6f6410a305161f50671e09b2151f437",
+    "bytes": 355905,
+    "format": "GIF",
+    "size": [
+      512,
+      512
+    ],
+    "frames": [
+      {
+        "frame": 0,
+        "duration_ms": 280,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "alpha_bbox": [
+          91,
+          10,
+          447,
+          504
+        ]
+      },
+      {
+        "frame": 1,
+        "duration_ms": 280,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "alpha_bbox": [
+          88,
+          10,
+          431,
+          503
+        ]
+      },
+      {
+        "frame": 2,
+        "duration_ms": 280,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "alpha_bbox": [
+          79,
+          10,
+          439,
+          502
+        ]
+      },
+      {
+        "frame": 3,
+        "duration_ms": 280,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "alpha_bbox": [
+          86,
+          9,
+          432,
+          503
+        ]
+      },
+      {
+        "frame": 4,
+        "duration_ms": 280,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "alpha_bbox": [
+          88,
+          9,
+          395,
+          503
+        ]
+      },
+      {
+        "frame": 5,
+        "duration_ms": 280,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "alpha_bbox": [
+          93,
+          10,
+          394,
+          503
+        ]
+      }
+    ],
+    "source_bytes_unchanged": true
+  },
+  "secretary.png": {
+    "source_file": "Cheerful Chibi Office Secretary.png",
+    "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
+    "bytes": 1184573,
+    "format": "PNG",
+    "size": [
+      1145,
+      1373
+    ],
+    "frames": [
+      {
+        "frame": 0,
+        "duration_ms": 0,
+        "alpha_extrema": [
+          0,
+          255
+        ],
+        "alpha_bbox": [
+          0,
+          0,
+          1101,
+          1373
+        ]
+      }
+    ],
+    "source_bytes_unchanged": true
+  }
+}

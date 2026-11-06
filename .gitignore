@@ -7,3 +7,5 @@ test-results/
 desktop/dist/
 desktop/src-tauri/target/
 desktop/src-tauri/gen/
+
+desktop/qa-results/

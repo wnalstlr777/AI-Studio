@@ -2,7 +2,7 @@ name: Build Hina Desktop
 on:
   workflow_dispatch:
   push:
-    branches: [hina-desktop-v1]
+    branches: [hina-desktop-v1, hina-input-qa-v1.0.1]
     paths:
       - 'desktop/**'
       - 'shared/hina/**'
@@ -26,7 +26,21 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
       - run: npm test
+      - run: npm run test:browser
+      - run: npm run prepare:ui
+      - name: Rust input lock and alpha mapping tests
+        run: |
+          rustc --test src-tauri/src/input.rs -o input-tests.exe
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .\input-tests.exe
       - run: npm run build
+      - run: npm run test:native
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: hina-qa-results
+          path: desktop/qa-results/
+          if-no-files-found: warn
       - uses: actions/upload-artifact@v4
         with:
           name: hina-desktop-windows

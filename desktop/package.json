@@ -1,5 +1,19 @@
 {
-  "name": "hina-desktop", "version": "1.0.0", "private": true, "type": "module",
-  "scripts": { "dev": "tauri dev", "build": "tauri build", "prepare:ui": "node scripts/build.mjs", "preview": "node scripts/serve.mjs", "test": "node tests/qa.test.js" },
-  "devDependencies": { "@tauri-apps/cli": "^2.8.0" }
+  "name": "hina-desktop",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "prepare:ui": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs",
+    "test": "node tests/qa.test.js",
+    "test:browser": "node tests/browser.mjs",
+    "test:native": "node tests/native.mjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.8.0",
+    "playwright-core": "^1.56.0"
+  }
 }

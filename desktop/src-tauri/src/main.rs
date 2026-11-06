@@ -1,21 +1,55 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use std::{sync::Mutex, time::{Duration, Instant}};
+mod input;
+use input::{HitMap, snapshot as input_snapshot};
+use std::{sync::{Arc, Mutex, atomic::{AtomicBool, AtomicUsize, Ordering}}, time::Duration};
 use tauri::{Emitter, Manager, State, PhysicalPosition};
 use tauri::menu::{Menu, MenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri_plugin_autostart::ManagerExt;
 
 #[derive(Default)]
-struct HitMap { pixels: Vec<u8>, width: usize, height: usize, lock_until: Option<Instant> }
-struct Runtime { hit: Mutex<HitMap>, target: Mutex<Option<String>> }
+struct Runtime {
+    hit: Mutex<HitMap>, target: Mutex<Option<String>>, dragging: AtomicBool,
+    ignored: AtomicBool, office_clicks: AtomicUsize, last_url: Mutex<Option<String>>,
+}
+fn qa_mode() -> bool { std::env::var("HINA_NATIVE_QA").as_deref()==Ok("1") }
+fn launch_target(url: String, state: &Runtime) -> Result<(), String> {
+    if qa_mode() { *state.last_url.lock().unwrap()=Some(url); return Ok(()); }
+    open::that_detached(url).map_err(|e| e.to_string())
+}
+#[tauri::command]
+fn open_office(state: State<Runtime>) -> Result<(), String> {
+    if qa_mode() { state.office_clicks.fetch_add(1,Ordering::SeqCst); }
+    launch_target("https://wnalstlr777.github.io/AI-Studio/".into(), &state)
+}
+#[tauri::command]
+fn qa_probe(window: tauri::WebviewWindow, state: State<Runtime>) -> Result<serde_json::Value,String> {
+    if !qa_mode() { return Err("Native QA mode is disabled".into()); }
+    let p=window.outer_position().map_err(|e|e.to_string())?;
+    let size=window.inner_size().map_err(|e|e.to_string())?;
+    let last_url=state.last_url.lock().unwrap().clone();
+    Ok(serde_json::json!({"x":p.x,"y":p.y,"width":size.width,"height":size.height,
+        "ignored":state.ignored.load(Ordering::SeqCst),"dragging":state.dragging.load(Ordering::SeqCst),
+        "clicks":state.office_clicks.load(Ordering::SeqCst),"last_url":last_url}))
+}
 #[tauri::command]
 fn hit_map(state: State<Runtime>, pixels: Vec<u8>, width: usize, height: usize) -> Result<(), String> {
     if width == 0 || height == 0 || width > 512 || height > 512 || pixels.len() != width*height { return Err("Invalid hit map".into()); }
     let mut hit = state.hit.lock().map_err(|e| e.to_string())?;
-    hit.pixels = pixels; hit.width = width; hit.height = height; Ok(())
+    hit.pixels = Arc::new(pixels); hit.width = width; hit.height = height; Ok(())
 }
 #[tauri::command]
-fn drag_lock(state: State<Runtime>) { state.hit.lock().unwrap().lock_until = Some(Instant::now()+Duration::from_secs(2)); }
+async fn drag_pet(window: tauri::WebviewWindow, app: tauri::AppHandle) -> Result<(),String> {
+    let state=app.state::<Runtime>();
+    state.dragging.store(true,Ordering::SeqCst);
+    let result=(||{
+        window.set_ignore_cursor_events(false).map_err(|e|e.to_string())?;
+        state.ignored.store(false,Ordering::SeqCst);
+        window.start_dragging().map_err(|e|e.to_string())
+    })();
+    state.dragging.store(false,Ordering::SeqCst);
+    result
+}
 #[tauri::command]
 fn autostart(app: tauri::AppHandle, enabled: Option<bool>) -> Result<bool, String> {
     let manager = app.autolaunch();
@@ -32,12 +66,12 @@ fn valid_url(url: &str) -> bool {
         }).unwrap_or(false)
 }
 #[tauri::command]
-fn open_run(url: String) -> Result<(), String> {
+fn open_run(url: String, state: State<Runtime>) -> Result<(), String> {
     if !valid_url(&url) { return Err("Invalid Actions URL".into()); }
-    open::that_detached(url).map_err(|e| e.to_string())
+    launch_target(url, &state)
 }
 #[tauri::command]
-fn notify(app: tauri::AppHandle, state: State<Runtime>, url: String, failure: bool) -> Result<(), String> {
+async fn notify(app: tauri::AppHandle, state: State<Runtime>, url: String, failure: bool) -> Result<(), String> {
     if !valid_url(&url) { return Err("Invalid Actions URL".into()); }
     // One app notification at a time; the frontend chooses failure before success.
     if let Some(old) = app.get_webview_window("notice") { old.destroy().map_err(|e| e.to_string())?; }
@@ -55,7 +89,7 @@ fn notify(app: tauri::AppHandle, state: State<Runtime>, url: String, failure: bo
 }
 #[tauri::command]
 fn notice_action(app: tauri::AppHandle, state: State<Runtime>, open: bool) -> Result<(), String> {
-    if open { if let Some(url) = state.target.lock().unwrap().clone() { open_run(url)?; } }
+    if open { if let Some(url) = state.target.lock().unwrap().clone() { if !valid_url(&url) { return Err("Invalid Actions URL".into()); } launch_target(url, &state)?; } }
     if let Some(w) = app.get_webview_window("notice") { w.close().map_err(|e| e.to_string())?; } Ok(())
 }
 fn work_area(window: &tauri::WebviewWindow) -> Result<(i32,i32,i32,i32), String> {
@@ -91,8 +125,8 @@ fn main() {
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app,_,_| { if let Some(w)=app.get_webview_window("main") { let _=move_pet(w.clone(),0.,true); let _=w.show(); } }))
         .plugin(tauri_plugin_autostart::Builder::new().build())
-        .manage(Runtime { hit: Mutex::new(HitMap::default()), target: Mutex::new(None) })
-        .invoke_handler(tauri::generate_handler![hit_map,drag_lock,autostart,open_run,notify,notice_action,move_pet,quit])
+        .manage(Runtime::default())
+        .invoke_handler(tauri::generate_handler![hit_map,drag_pet,autostart,open_run,open_office,qa_probe,notify,notice_action,move_pet,quit])
         .setup(|app| {
             let settings = MenuItem::with_id(app,"settings","설정",true,None::<&str>)?;
             let restore = MenuItem::with_id(app,"restore","화면 하단으로 복귀",true,None::<&str>)?;
@@ -108,17 +142,24 @@ fn main() {
                 }).build(app)?;
             let handle=app.handle().clone();
             std::thread::spawn(move || {
-                let mut ignored=false;
                 loop {
                     std::thread::sleep(Duration::from_millis(80));
                     let Some(w)=handle.get_webview_window("main") else { break };
-                    let state=handle.state::<Runtime>(); let hit=state.hit.lock().unwrap();
-                    if hit.lock_until.is_some_and(|t| Instant::now()<t) { continue; }
+                    let state=handle.state::<Runtime>();
+                    if state.dragging.load(Ordering::SeqCst) { continue; }
+                    #[cfg(windows)]
+                    unsafe {
+                        use windows_sys::Win32::UI::Input::KeyboardAndMouse::{GetAsyncKeyState,VK_LBUTTON};
+                        if GetAsyncKeyState(VK_LBUTTON as i32)<0 { continue; }
+                    }
+                    // No guard is alive while any Tauri/window API below synchronously dispatches.
+                    let hit=input_snapshot(&state.hit);
                     if let (Ok(cursor),Ok(pos),Ok(size))=(w.cursor_position(),w.outer_position(),w.inner_size()) {
-                        let x=((cursor.x-pos.x as f64)/size.width.max(1) as f64*hit.width as f64).floor() as isize;
-                        let y=((cursor.y-pos.y as f64)/size.height.max(1) as f64*hit.height as f64).floor() as isize;
-                        let opaque=x>=0 && y>=0 && x<hit.width as isize && y<hit.height as isize && hit.pixels.get(y as usize*hit.width+x as usize).copied().unwrap_or(0)>0;
-                        if ignored==opaque { if w.set_ignore_cursor_events(!opaque).is_ok() { ignored=!opaque; } }
+                        let opaque=hit.opaque(cursor.x-pos.x as f64,cursor.y-pos.y as f64,size.width,size.height);
+                        let ignore=!opaque;
+                        if state.ignored.load(Ordering::SeqCst)!=ignore {
+                            if w.set_ignore_cursor_events(ignore).is_ok() { state.ignored.store(ignore,Ordering::SeqCst); }
+                        }
                     }
                 }
             });
