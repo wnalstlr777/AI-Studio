@@ -8,7 +8,7 @@ on:
         default: ''
         type: string
   push:
-    branches: [hina-desktop-v1, hina-input-qa-v1.0.1]
+    branches: [hina-desktop-v1, hina-input-qa-v1.0.1, hina-remote-assets-v1]
     paths:
       - 'desktop/**'
       - 'shared/hina/**'
@@ -32,6 +32,7 @@ jobs:
           cache-dependency-path: desktop/package-lock.json
       - uses: dtolnay/rust-toolchain@stable
       - run: npm ci
+      - run: node scripts/validate-asset-manifest.mjs
       - run: npm test
       - run: npm run test:browser
       - run: npm run prepare:ui
