@@ -34,7 +34,7 @@ try{
   await page.waitForFunction(()=>!!window.__TAURI__?.core && document.querySelector('#pet'));
   let runs=[];await context.route('https://api.github.com/**',route=>route.fulfill({json:{workflow_runs:runs}}));
   await page.evaluate(()=>{localStorage.clear();localStorage.setItem('hina.settings',JSON.stringify({roam:false,notifications:false,top:true,size:200}));});
-  await page.reload();await page.clock.install();
+  await page.clock.install();await page.reload();
   const probe=()=>page.evaluate(()=>window.__TAURI__.core.invoke('qa_probe'));
   const point=async(selector='#asset-status')=>{
     const p=await probe(),r=await page.locator(selector).boundingBox(),size=await page.evaluate(()=>({w:innerWidth,h:innerHeight}));
@@ -43,7 +43,7 @@ try{
   async function clickOffice(label){
     const before=await probe(),p=await point();mouse(p.x,p.y);await page.waitForFunction(n=>window.__TAURI__.core.invoke('qa_probe').then(p=>p.clicks===n),before.clicks+1);
     const after=await probe();assert.equal(after.last_url,'https://wnalstlr777.github.io/AI-Studio/');
-    report.results.push({case:label,status:'passed'});
+    report.results.push({case:label,status:'passed'});console.log(`PASS native: ${label}`);
   }
   await page.waitForFunction(()=>document.body.dataset.state==='IDLE');
   await clickOffice('native click opens office target');
