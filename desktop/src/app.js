@@ -20,6 +20,7 @@ function scheduleGreeting(){
   greetingTimer=setTimeout(()=>{
     if(state==='IDLE' && !interacting && $('#settings').hidden){
       greetingActive=true;
+      document.body.classList.remove('idle-breath');
       $('#character').src=greetingSrc;
       clearTimeout(greetingEndTimer);
       greetingEndTimer=setTimeout(()=>{greetingActive=false;render(state,true);},1680);
