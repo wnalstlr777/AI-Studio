@@ -1,14 +1,15 @@
-# MS 사무실 — 히나 Desktop Pet v1.0 Windows 빌드
+# MS 사무실 — 히나 Desktop Pet v1.0.1 Windows 빌드
 
 Windows 전용 별도 Tauri 2 앱이다. Sea/HINA 게임 코드는 변경하지 않는다.
 `../shared/hina/`의 상태·에셋 정의를 대시보드와 공유하고 실행 코드는 분리한다.
 
 ## 설치 파일 다운로드
 
-[Windows x64 설치 파일 Artifact](https://github.com/wnalstlr777/AI-Studio/actions/runs/42157315192/artifacts/13474458702)
-(GitHub 로그인 필요). ZIP을 풀고 `히나 비서_1.0.0_x64-setup.exe`를 실행한다.
+[Windows x64 설치 파일 Artifact](https://github.com/wnalstlr777/AI-Studio/actions/runs/42162388912/artifacts/13477537744)
+(GitHub 로그인 필요). ZIP을 풀고 `히나 비서_1.0.1_x64-setup.exe`를 실행한다.
 2026-11-06 Windows Actions에서 빌드·업로드 성공. Artifact 보관 기한: 2026-12-06.
-코드 서명은 하지 않았다. Windows 설치·실제 동작 검증은 사용자가 진행한다.
+코드 서명은 하지 않았다. 실제 Windows 실행 파일의 자동 입력 검수는 통과했다.
+설치 마법사와 사용자 PC 환경의 동작은 사용자 확인이 필요하다. 기존 히나를 종료한 뒤 설치한다.
 
 ## 소스에서 실행 (Windows 10/11)
 
@@ -24,8 +25,9 @@ npm run build
 ```
 
 Windows 빌드 워크플로 `.github/workflows/hina-desktop.yml`은 수동 실행과
-`hina-desktop-v1` 브랜치의 앱 소스 push를 지원한다. main 반영은 PR #1로 완료했다.
-빌드 성공과 실제 Windows 실행 검증은 별개이며, 후자는 아직 미검수다.
+`hina-desktop-v1` / `hina-input-qa-v1.0.1` 브랜치의 앱 소스 push를 지원한다.
+main 반영은 PR #2로 완료했다. 수동 `reuse_run_id`는 앱 소스가 완전히 같은 경우에만
+기존 실행 파일로 네이티브 QA를 재실행하며, 소스가 다르면 중단한다.
 
 UI만 확인: `npm run preview` → http://127.0.0.1:1420.
 브라우저에서는 OS 이동·드래그·트레이·자동 실행·앱 알림이 작동하지 않는다.
@@ -35,10 +37,11 @@ UI만 확인: `npm run preview` → http://127.0.0.1:1420.
 
 - 투명·테두리 없는 창, 시스템 트레이(설정/화면 복귀/종료), 단일 인스턴스.
 - 캐릭터 알파와 표시 중인 UI를 160×210 입력 마스크로 전달한다. 네이티브에서 80ms마다
-  커서 위치를 검사해 투명 영역의 입력을 통과시킨다. 창 전체가 통과 중이어도 복귀 가능하다.
+  커서 위치를 검사해 투명 영역의 입력을 통과시킨다. 마스크는 불변 스냅샷으로 읽고
+  잠금을 해제한 뒤 창 API를 호출해 UI 스레드와의 교착을 방지한다. 창 전체가 통과 중이어도 복귀 가능하다.
   애니메이션 연결 시 마스크는 250ms 간격, 정적 그림은 로드·UI 변경 시에만 갱신한다.
-- 클릭: 현재 **Sea QA** 상태 및 에이전트 미연결 안내. 말풍선 클릭: 해당 Actions 실행 열기.
-  5px 이상 드래그: OS 창 이동. 우클릭: 설정.
+- 클릭: **MS 사무실 웹페이지** 열기. QA 오류 말풍선·알림 클릭: 해당 Actions 실행 열기.
+  5px 이상 드래그: OS 창 이동. 포인터 해제·취소 및 드래그 종료 후 다음 클릭을 유지한다. 우클릭: 설정.
 - 15~30초 간격 대기/이동/휴식 상태 선택. WALK 동안에만 120ms 이동 타이머를 사용한다.
   Windows 작업 영역(작업표시줄 제외) 내 하단 이동 및 가장자리 방향 전환. 그림은 좌우 반전만 한다.
   WALK·REST 상태 변경은 전용 애니메이션 완성을 의미하지 않는다.
@@ -67,45 +70,54 @@ UI만 확인: `npm run preview` → http://127.0.0.1:1420.
 - 외부 링크는 이 저장소의 Actions 실행 URL만 허용한다. 인증 토큰은 사용하거나 저장하지 않는다.
   비공개 저장소 인증은 이번 범위에 구현하지 않았다.
 
-## 에셋 현황 / 교체
+## 실제 히나 에셋
 
-첨부된 SD 이미지는 대화에서만 확인했다. 다운로드 가능한 원본 이미지·GIF가 작업 공간이나
-확인한 AI-Studio 저장소에 없어 **원본 알파, 프레임, 루프, 얼굴·안경·손 일관성 모두 미검수**다.
-기존 대시보드의 SVG를 `shared/hina/assets/placeholder.svg`로 분리하여 임시 사용한다.
-이 그림은 첨부 원본을 변환한 결과가 아니다. CSS 회전/확대를 전용 동작으로 표시하지 않는다.
-IDLE 포함 6종 모두 `complete: false`, 전용 애니메이션 미제작으로 표시한다.
+사용자가 전달한 `Cheerful Chibi Office Greeting Animation.zip`의 원본을 적용했다.
+임시 SVG는 제거했으며 원본 바이트를 재생성·수정하지 않았다.
 
-1. 원본 GIF/WebP/APNG를 `shared/hina/assets/`에 넣는다 (원본 보존).
-2. `python -m pip install Pillow`, `python scripts/audit-asset.py FILE`로 프레임별 알파·시간·bbox를 확인한다.
-   불투명 프레임이 있으면 exit 2. 투명 픽셀 존재만 검사하므로 배경 제거 품질을 보증하지 않는다.
-3. 체커보드 배경에서 원본을 재생하고 얼굴/안경/손, 가장자리 잔여 배경, 기준 위치, 2~3초 루프를 검수한다.
-   필요한 배경 정리/포맷 변환은 별도 수행한다. 불투명 GIF의 확장자만 바꾸지 않는다.
-4. `shared/hina/assets.js`에서 해당 상태의 `src`를 `./assets/파일명`으로 설정한다.
-   검수가 끝난 상태만 `complete: true`로 변경한다. 웹·앱이 동일 파일을 사용한다.
-5. `npm run prepare:ui`로 배포용 UI를 다시 복사한다.
+- `shared/hina/assets/greeting.gif`: 512×512, 6프레임, 각 280ms, 총 1.68초, 무한 반복.
+  모든 합성 프레임의 투명 알파·외곽·체커보드 표시를 확인했다. IDLE 인사 모션으로 사용한다.
+- `shared/hina/assets/secretary.png`: 1145×1373 RGBA 원본.
+  WALK/REST/WORK/SUCCESS/ALERT에서는 이 그림과 **전용 모션 미제작** 표시를 사용한다.
+  상태 전환 테스트 통과는 이들 전용 애니메이션 제작 완료를 의미하지 않는다.
+- 검은 단발·둥근 안경·눈웃음·네이비 정장·스카프·서류철을 원본 그대로 유지한다.
+  원본 GIF의 1.68초 길이를 보존했으며 2~3초로 재생성하지 않았다.
+- 원본 파일명·크기·프레임별 알파 범위·바이트 동일성·SHA-256은
+  `shared/hina/assets/audit.json`에 기록했다.
 
-## 검증 기록 (2차 작업)
+후속 모션은 `shared/hina/assets/`에 넣고 `shared/hina/assets.js`에서 해당 상태의
+`src`, `animated`, `complete`를 바꾼다. 검수가 완료된 모션만 `complete: true`로 설정한다.
+알파 검사: `python scripts/audit-asset.py FILE` (Pillow 필요).
+`npm run prepare:ui`로 웹과 같은 에셋을 앱 UI에 복사한다.
 
-- [최종 Windows 빌드](https://github.com/wnalstlr777/AI-Studio/actions/runs/42157315192): 성공.
-  소스 커밋 `e42b04955df3510f487e44c3b92a8f540123d96a`.
-- x64 Release `hina-desktop.exe` 및 NSIS `히나 비서_1.0.0_x64-setup.exe` 생성 확인.
-- Artifact `hina-desktop-windows`, ID `13474458702`, 2,014,655 bytes, 업로드 성공.
-  ZIP SHA-256: `f344232be1013b1364ae1509fbee2a8cd9e3998f510e4d241d214cadff6bb7b3`.
-- [PR #1](https://github.com/wnalstlr777/AI-Studio/pull/1) main 병합 완료.
-- Node 핵심 로직 테스트 7개, 정적 UI 복사 빌드 통과.
-- Chromium PC(1280px)/모바일(390px) 레이아웃·제목·QA 성공 표시·연결 오류 구분 통과.
-  GitHub 응답은 테스트용 데이터로 주입했으며 실제 Sea 게임 QA 통과를 의미하지 않는다.
-- 브라우저 점검에서 확인한 fetch receiver 오류를 공유 모듈에서 수정했다.
-- 기존 Sea QA 워크플로·테스트 파일·게임 소스는 변경하지 않았다. Sea 게임 QA는 재실행하지 않았다.
-- Windows 설치/실행/클릭 통과/드래그/다중 모니터·DPI/자동 실행/알림 클릭/종료 후 프로세스/
-  CPU·GPU 실측은 미검수이며 사용자 확인이 필요하다.
-- 원본 GIF 알파 및 전용 6종 애니메이션은 미검수/미제작. 기존 임시 SVG 유지.
+## 검증 기록 (v1.0.1)
+
+- [Windows 설치 파일 빌드·업로드](https://github.com/wnalstlr777/AI-Studio/actions/runs/42162388912):
+  x64 Release / NSIS 생성 성공. 빌드 소스 `6612b70b08cf44e2917f9b009ee7c7e29b1c2370`.
+  이 실행의 초기 네이티브 테스트는 검사기 시작 타이밍 문제로 실패했으며 아래 최종 실행으로 확인했다.
+- [최종 자동 QA 실행](https://github.com/wnalstlr777/AI-Studio/actions/runs/42163107717): **성공**.
+  생성된 실행 파일과 현재 앱 소스가 같은지 먼저 검증해 재컴파일 없이 테스트했다.
+- [검수 결과 Artifact](https://github.com/wnalstlr777/AI-Studio/actions/runs/42163107717/artifacts/13477199769):
+  GIF 프레임 알파, 브라우저 테스트 결과, Windows 네이티브 JSON·스크린샷 포함.
+- Node 7개: 실제 QA 상태, 중복 방지, 네트워크 오류, API 제한, fetch 호출 회귀 통과.
+- Rust 2개: 잠금 스냅샷 재진입 2,000회 및 알파·DPI 좌표 매핑 통과.
+- 브라우저: IDLE/WALK/REST/WORK/ALERT 각각 클릭→드래그→다시 클릭, 오류 상세 URL,
+  원본 GIF 및 투명/불투명 입력 마스크 확인. **Tauri IPC 모의 테스트**로 구분한다.
+- Windows 네이티브: 실제 실행 파일에 **Win32 마우스 입력**을 보내 클릭, 창 드래그,
+  드래그 후 클릭 복구, 투명 영역에서 재진입, 다섯 상태 전환 후 클릭 유지 확인.
+  오류 말풍선·네이티브 알림의 Actions URL 및 앱 종료 코드 0 확인.
+- 네이티브 QA는 `HINA_NATIVE_QA=1`에서 검사 포트를 열고 외부 링크 대상을 기록한다.
+  실제 외부 브라우저 실행은 생략하므로 사용자 기본 브라우저 실행 성공을 의미하지 않는다.
+  테스트용 QA 응답을 주입하며 실제 Sea QA 결과나 에이전트 상태를 조작하지 않는다.
+  일반 실행은 이 모드를 사용하지 않는다.
+- 웹 대시보드 PC/모바일 레이아웃·실제 히나 이미지·QA 성공/연결 오류 구분 확인.
+  기존 Sea QA 워크플로·테스트·게임 소스는 변경하지 않았다. Sea 게임 QA는 재실행하지 않았다.
+- 설치 마법사 실행, 사용자 PC의 기본 브라우저·자동 실행·다중 모니터·고DPI·장시간 상주·
+  CPU/GPU 실측은 이번 자동 검수 범위가 아니다.
 
 ## 사용자 확인 순서
 
-1. 위 Artifact에서 ZIP을 다운로드하고 설치 파일을 실행한다.
-2. 히나 표시·배경 투명·주변 클릭 통과·드래그·이동을 확인한다.
-3. 트레이 설정, 항상 위/자유 이동/크기/알림/자동 실행 설정을 확인한다.
-4. QA 조회·Actions 링크·새 이벤트 알림을 확인한다 (최초 조회는 과거 이벤트를 호출하지 않는다).
-5. 트레이에서 종료한 뒤 히나 프로세스가 정리되는지 확인한다.
-6. 실제 GIF 전달 후 에셋 검수·교체를 진행한다.
+1. 기존 히나를 트레이에서 종료한다. 먹통이면 작업 관리자에서 `hina-desktop.exe`를 종료한다.
+2. 위 Artifact의 ZIP을 풀고 `히나 비서_1.0.1_x64-setup.exe`를 실행한다.
+3. 실제 히나 표시·주변 클릭 통과·드래그 후 클릭·MS 사무실 열기를 확인한다.
+4. 오류 알림에서 해당 Actions 기록이 열리는지, 트레이 종료 후 앱이 끝나는지 확인한다.
