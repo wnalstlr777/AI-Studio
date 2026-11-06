@@ -28,7 +28,7 @@ try{
   }
   browser=await chromium.connectOverCDP('http://127.0.0.1:9222');
   const context=browser.contexts()[0];
-  page=context.pages().find(p=>p.url().includes('localhost'))||context.pages()[0];
+  page=context.pages().find(p=>p.url().includes('localhost'))||context.pages()[0]||await context.waitForEvent('page',{timeout:15000});
   assert.ok(page,'Tauri WebView page missing');page.setDefaultTimeout(10000);
   await page.waitForURL(/^(https?:\/\/tauri\.localhost|tauri:\/\/localhost)/,{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>!!window.__TAURI__?.core && document.querySelector('#pet'));
