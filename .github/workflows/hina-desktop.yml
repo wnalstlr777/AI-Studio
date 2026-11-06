@@ -1,6 +1,12 @@
 name: Build Hina Desktop
 on:
   workflow_dispatch:
+    inputs:
+      reuse_run_id:
+        description: 'Optional: rerun native QA using a previous executable (source must match)'
+        required: false
+        default: ''
+        type: string
   push:
     branches: [hina-desktop-v1, hina-input-qa-v1.0.1]
     paths:
@@ -9,6 +15,7 @@ on:
       - '.github/workflows/hina-desktop.yml'
 permissions:
   contents: read
+  actions: read
 jobs:
   windows:
     runs-on: windows-latest
@@ -33,14 +40,36 @@ jobs:
           rustc --test src-tauri/src/input.rs -o input-tests.exe
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           .\input-tests.exe
+      - name: Verify source of reused native executable
+        if: inputs.reuse_run_id != ''
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REUSE_RUN_ID: ${{ inputs.reuse_run_id }}
+        run: |
+          if ($env:REUSE_RUN_ID -notmatch '^\d+$') { throw 'Invalid run ID' }
+          $source = gh api "repos/$env:GITHUB_REPOSITORY/actions/runs/$env:REUSE_RUN_ID" --jq '.head_sha'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git fetch --depth=1 origin $source
+          git diff --exit-code $source HEAD -- src scripts src-tauri ../../shared/hina
+          if ($LASTEXITCODE -ne 0) { throw 'Production sources differ from the reused executable' }
+      - uses: actions/download-artifact@v4
+        if: inputs.reuse_run_id != ''
+        with:
+          name: hina-native-test-executable
+          path: desktop/src-tauri/target/release
+          run-id: ${{ inputs.reuse_run_id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - run: npm run build
+        if: inputs.reuse_run_id == ''
       - uses: actions/upload-artifact@v4
+        if: inputs.reuse_run_id == ''
         with:
           name: hina-desktop-windows
           path: desktop/src-tauri/target/release/bundle/nsis/*.exe
           if-no-files-found: error
           retention-days: 30
       - uses: actions/upload-artifact@v4
+        if: inputs.reuse_run_id == ''
         with:
           name: hina-native-test-executable
           path: desktop/src-tauri/target/release/hina-desktop.exe
