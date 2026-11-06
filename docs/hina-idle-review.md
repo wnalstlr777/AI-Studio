@@ -53,7 +53,7 @@
 - 기존 브라우저: IDLE/WALK/REST/WORK/ALERT 클릭→드래그→다시 클릭, 알파 마스크, 원격 캐시 복구 8항목 통과.
 - 새 브라우저 13항목: 8종 실제 픽셀 변화, 정지/재개, 올바른 pack 활성화, 가짜 프레임/시간/일반상태 SHA alias 거부, 새 canvas 입력, WORK 우선, 연결 장애 시 기존 ALERT 보존 통과.
 - 독립 에이전트 코드 검토에서 제기한 타이밍·상태 초기화·atomic 검증 우회 문제를 수정하고 재확인했다. 독립 코드 검토와 실제 브라우저 실행은 구분한다.
-- **Windows Tauri EXE 실행, 트레이/자동실행, 실 Win32 클릭·드래그, 사용자 PC 업데이트는 미검수.** 이 환경은 Linux이며 Windows/MSVC/WebView2 실행 환경이 제공되지 않았다.
+- **Windows Actions 실행 [42177581559](https://github.com/wnalstlr777/AI-Studio/actions/runs/42177581559) 성공.** 기존 실제 Tauri EXE/Win32 입력·상태 전환·원격 캐시 회귀와 새 Edge 브라우저 8종 검사 통과. 새 8종 각각의 네이티브 입력·전환 전수 검수, 설치 마법사, 트레이/자동실행 및 사용자 PC 업데이트는 아직 확인하지 않았다.
 
 ## 6. QA 연결 오류
 
@@ -63,6 +63,8 @@
 
 ## 7–9. 커밋·Actions·배포
 
-로컬 커밋 ID는 최종 응답에 기록한다. GitHub push, Windows Actions 실행, Pages 배포, 설치본 제공은 수행하지 않았다. 따라서 GitHub 커밋/Actions 빌드 성공이나 현재 Windows 앱 반영을 주장하지 않는다.
+구현 `8789d480e4cd162327ca25a8da09b0baedec11c0`, main 빌드 연결 `f474e25cd4eb4b81ae404bc7486e735f8342ecde`를 원격 main에 푸시했다. [Pages 배포](https://github.com/wnalstlr777/AI-Studio/actions/runs/42177479117)는 24초, [Windows 빌드·QA](https://github.com/wnalstlr777/AI-Studio/actions/runs/42177581559)는 5분 43초에 성공했다. [v1.2 설치 파일 ZIP](https://github.com/wnalstlr777/AI-Studio/actions/runs/42177581559/artifacts/13484580774)은 13.8 MB이며 GitHub 로그인이 필요하다.
 
-남은 작업: 미완성 필기 손과 숨겨진 파츠 보완 → 아트/정렬 승인 → Windows v1.2 빌드·실기 검수 → 승인된 결과 push/배포 → 공개 HTTPS 파일·CORS·해시 확인 → 실행 중인 사용자 앱에서 10분 업데이트와 오프라인 복구 검수.
+원격 업데이트는 앱 실행 파일 자체를 업데이트하지 않는다. 새 목록을 인식하려면 사용자가 v1.2를 한 번 설치해야 한다. 현재 PC에 자동 설치했다고 주장하지 않는다. 여덟 모션은 시안이며 기본 자동 재생 승인은 여전히 하지 않았다. [설치·시안 재생 순서](hina-windows-install.md)를 따른다.
+
+남은 작업: 미완성 필기 손과 숨겨진 파츠 보완, 아트/정렬 승인, 8종 네이티브 전수 검수, 공개 HTTPS 파일·CORS·해시 확인, 사용자 PC 설치 후 10분 업데이트와 오프라인 복구 검수. Pages 워크플로 성공과 실제 사용자 PC 반영은 구분한다.

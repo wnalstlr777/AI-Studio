@@ -193,10 +193,27 @@
     ]
   },
   "unrun": [
-    "Windows build",
-    "Windows native QA",
-    "live Pages deployment and asset update on user PC"
+    "User PC installation and playback",
+    "All eight motions individually tested in native EXE",
+    "Live Pages HTTPS byte/CORS verification from this cloud runtime"
   ],
   "artApproved": false,
-  "published": false
+  "published": true,
+  "publishedScope": "Repository main and GitHub Pages; not installed on the user PC",
+  "windowsCI": {
+    "run": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42177581559",
+    "headSha": "f474e25cd4eb4b81ae404bc7486e735f8342ecde",
+    "conclusion": "success",
+    "duration": "5m 43s",
+    "installerArtifact": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42177581559/artifacts/13484580774",
+    "installerZipSize": "13.8 MB",
+    "installerZipSha256": "36f28a927ab2b155dc35a396ccfe394e247306a9344b7c22a6481f28a834a73d",
+    "scope": "Windows build, existing native Win32 input/state/remote cache tests, eight-motion Edge browser tests; not user-PC verification"
+  },
+  "pagesCI": {
+    "run": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42177479117",
+    "headSha": "8789d480e4cd162327ca25a8da09b0baedec11c0",
+    "conclusion": "success",
+    "duration": "24s"
+  }
 }
