@@ -9,13 +9,27 @@
 <div class="layout"><section class="panel"><h3>👥 에이전트 오피스</h3><div class="muted">현재는 역할 시각화 화면입니다. 에이전트의 실시간 작업 상태는 아직 연결되지 않았어요.</div><div class="office"><div class="desk"><div class="avatar">🧠</div><strong>총괄</strong><small>규칙 · 업무 분류</small><span class="state">설계 단계</span></div><div class="desk"><div class="avatar">💻</div><strong>개발</strong><small>코드 구현 · 수정</small><span class="state">연결 준비</span></div><div class="desk"><div class="avatar">🔎</div><strong>QA</strong><small>브라우저 · 회귀 검수</small><span class="state">테스트 구성됨</span></div></div><div class="line"></div><h3>📌 공통 개발 규칙</h3><div class="list"><div class="item"><div><strong>월드 UI 공통 규칙</strong><div><span>거리 · 가림 · 위치 · 캐릭터 겹침</span></div></div><a class="link" href="https://github.com/wnalstlr777/AI-Studio/blob/main/rules/world-ui.md" target="_blank" rel="noopener">보기 ↗</a></div><div class="item"><div><strong>에이전트 운영 규칙</strong><div><span>작업 분배 · 최소 수정 · 검수 보고</span></div></div><a class="link" href="https://github.com/wnalstlr777/AI-Studio/blob/main/AGENTS.md" target="_blank" rel="noopener">보기 ↗</a></div></div></section>
 <aside class="panel"><h3>🧪 Sea QA</h3><div class="muted">GitHub Actions의 실행 결과를 확인할 수 있어요.</div><div class="line"></div><div id="run-result">실행 기록을 확인하려면 아래 버튼을 눌러 주세요.</div><div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap"><button class="btn" id="check">↻ 결과 확인</button><a class="btn" href="https://github.com/wnalstlr777/AI-Studio/actions/workflows/sea-qa.yml" target="_blank" rel="noopener">Actions 열기 ↗</a></div><div class="line"></div><h3>🎮 프로젝트</h3><div class="list"><div class="item"><div><strong><span class="dot"></span>Sea</strong><div><span>Three.js · 양식 / 말풍선 QA</span></div></div><a class="link" href="https://wnalstlr777.github.io/Sea/" target="_blank" rel="noopener">게임 ↗</a></div><div class="item"><div><strong><span class="dot amber"></span>HINA</strong><div><span>Three.js · 검수 연결 예정</span></div></div><span class="badge">예정</span></div></div></aside></div><p class="foot">AI Studio v0.1 · 화면은 실제 AI 작업 실행기가 아닌 관리 대시보드입니다. QA 상태는 조회 가능할 때만 표시합니다.</p>
 </div><script>
-document.querySelector('#check').addEventListener('click',async()=>{
- const el=document.querySelector('#run-result');el.textContent='실행 기록 조회 중…';
- try{const r=await fetch('https://api.github.com/repos/wnalstlr777/AI-Studio/actions/workflows/sea-qa.yml/runs?per_page=1',{headers:{Accept:'application/vnd.github+json'}});
- if(!r.ok)throw Error('GitHub API '+r.status);
- const data=await r.json();const run=data.workflow_runs?.[0];if(!run){el.textContent='실행 기록이 없습니다.';return;}
- const status=run.status==='completed'?(run.conclusion==='success'?'통과 ✓':run.conclusion==='failure'?'실패 ✕':run.conclusion||'완료'):'진행 중';
- el.replaceChildren(document.createTextNode('최근 실행: '+status+' · '+new Date(run.created_at).toLocaleString('ko-KR')+' '));const a=document.createElement('a');a.href=run.html_url;a.target='_blank';a.rel='noopener';a.textContent='상세 보기 ↗';el.append(a);
- }catch(e){el.textContent='실행 결과를 자동으로 읽을 수 없습니다. 비공개 저장소에서는 GitHub 로그인 인증이 필요합니다. 위의 Actions 열기를 이용해 주세요.';}
-});
+const resultEl=document.querySelector('#run-result');
+const checkButton=document.querySelector('#check');
+const runsApi='https://api.github.com/repos/wnalstlr777/AI-Studio/actions/workflows/sea-qa.yml/runs?per_page=1';
+async function updateSeaQA(){
+ checkButton.disabled=true;
+ resultEl.textContent='실행 결과 확인 중…';
+ try{
+  const response=await fetch(runsApi,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});
+  if(!response.ok)throw new Error('HTTP '+response.status);
+  const payload=await response.json();
+  const run=payload.workflow_runs?.[0];
+  if(!run){resultEl.textContent='아직 Sea QA 실행 기록이 없습니다.';return;}
+  const status=run.status==='completed'?(run.conclusion==='success'?'통과 ✓':run.conclusion==='failure'?'실패 ✕':'완료 · '+(run.conclusion||'상태 미확인')):'진행 중';
+  const time=new Date(run.created_at).toLocaleString('ko-KR');
+  resultEl.replaceChildren(document.createTextNode('최근 실행: '+status+' · '+time+' '));
+  const link=document.createElement('a');link.href=run.html_url;link.target='_blank';link.rel='noopener';link.textContent='상세 보기 ↗';resultEl.append(link);
+ }catch(error){
+  resultEl.textContent='QA 결과 조회 실패 ('+error.message+'). 잠시 후 다시 시도하거나 Actions에서 확인해 주세요.';
+ }finally{checkButton.disabled=false;}
+}
+checkButton.addEventListener('click',updateSeaQA);
+updateSeaQA();
+setInterval(()=>{if(!document.hidden)updateSeaQA();},60000);
 </script></body></html>
