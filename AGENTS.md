@@ -1,24 +1,24 @@
-# AI-Studio — Agent Operating Rules
+# AI-Studio — 에이전트 운영 규칙
 
-This repository is the shared development rulebook for Sea, HINA SURVIVAL, and future projects.
+이 저장소는 Sea, HINA SURVIVAL 및 향후 프로젝트에서 공통으로 사용하는 개발 규칙을 관리한다.
 
-## Roles
-- **Coordinator**: classify requests, identify applicable rules, define scope, report outcomes.
-- **Developer**: make focused code changes in the target project; do not perform unrelated refactors.
-- **QA**: independently verify affected behaviors, including regression cases; report evidence and limitations.
+## 담당 역할
+- **총괄 에이전트**: 요청 분류, 적용할 규칙 확인, 작업 범위 결정, 결과 취합 및 보고
+- **개발 에이전트**: 해당 프로젝트의 코드를 필요한 범위에서만 수정하며 무관한 리팩터링은 하지 않음
+- **QA 에이전트**: 수정된 기능과 기존 기능의 회귀 여부를 독립적으로 검수하고 근거 및 한계를 보고
 
-These are roles, not claims that autonomous agents are already running.
+위 항목은 역할 정의이며, 현재 모든 에이전트가 자동으로 실행되고 있다는 뜻은 아니다.
 
-## Mandatory workflow
-1. Identify project, engine, and affected feature.
-2. Read relevant files under `rules/` and `projects/`.
-3. Apply the smallest safe change.
-4. Run the relevant checks and record pass/fail/not-tested.
-5. Report commit IDs and distinguish code inspection from actual browser verification.
-6. When a defect repeats, propose a reusable regression test and update the rulebook.
+## 필수 작업 절차
+1. 대상 프로젝트, 엔진, 수정할 기능을 파악한다.
+2. `rules/` 및 `projects/`에서 관련 규칙을 확인한다.
+3. 안전한 범위 내에서 최소한의 코드만 수정한다.
+4. 관련 테스트를 실행하고 통과 / 실패 / 미검수 상태를 기록한다.
+5. 커밋 ID를 보고하고 코드 검토와 실제 브라우저 검수를 구분한다.
+6. 같은 문제가 반복되면 재발 방지용 자동 테스트를 제안하고 공통 규칙을 갱신한다.
 
-## Guardrails
-- Never claim a visual test passed without actually executing it.
-- Never commit secrets or credentials. Use GitHub Actions secrets where needed.
-- Limit automated retry loops and avoid expensive full-project audits for small changes.
-- Do not merge or deploy unreviewed changes to production unless explicitly authorized.
+## 안전 및 효율 원칙
+- 실제로 화면을 확인하지 않았다면 시각 검수를 통과했다고 보고하지 않는다.
+- 비밀번호, API 키 등 인증 정보를 저장소에 직접 올리지 않는다. 필요한 값은 GitHub Actions Secrets로 관리한다.
+- 자동 수정 재시도 횟수를 제한하고, 작은 수정에 불필요한 전체 프로젝트 분석이나 장시간 검수를 수행하지 않는다.
+- 명시적 승인 없이 검토되지 않은 변경사항을 운영 환경에 병합하거나 배포하지 않는다.
