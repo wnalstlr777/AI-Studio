@@ -77,7 +77,9 @@ async fn notify(app: tauri::AppHandle, state: State<'_, Runtime>, url: String, f
     if let Some(old) = app.get_webview_window("notice") { old.destroy().map_err(|e| e.to_string())?; }
     *state.target.lock().unwrap() = Some(url);
     let path = if failure { "notice.html?failure=1" } else { "notice.html" };
-    let notice = tauri::WebviewWindowBuilder::new(&app, "notice", tauri::WebviewUrl::App(path.into()))
+    let mut notice_builder=tauri::WebviewWindowBuilder::new(&app, "notice", tauri::WebviewUrl::App(path.into()));
+    if qa_mode() { notice_builder=notice_builder.additional_browser_args("--remote-debugging-port=9222"); }
+    let notice = notice_builder
         .title("MS 사무실 — QA 알림").inner_size(320.,110.).decorations(false).resizable(false)
         .always_on_top(true).skip_taskbar(true).focused(false).build().map_err(|e| e.to_string())?;
     if let Some(pet) = app.get_webview_window("main") {
