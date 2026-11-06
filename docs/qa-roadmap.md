@@ -1,16 +1,15 @@
-# QA rollout
+# QA 구축 현황
 
-## Implemented
-- Independent AI-Studio Playwright configuration.
-- Desktop Chrome and mobile emulation smoke checks for deployed Sea.
-- Failure screenshots, traces, and HTML report.
-- Manual GitHub Actions execution (once workflow is installed).
+## 현재 구성
+- AI-Studio용 Playwright 테스트 설정
+- Sea 게임의 PC 및 모바일 기본 실행 검사
+- 오류 스크린샷과 테스트 보고서 보관
+- GitHub Actions 자동 실행 설정
 
-## Not yet implemented
-- Deterministic Sea debug hooks to place camera/avatar/fry at known coordinates.
-- Actual world-label proximity, occlusion, overlap and overview assertions.
-- Automatic triggers on Sea commits or pull requests.
-- Autonomous code-fixing agents.
+## 다음 단계
+- 카메라, 캐릭터, 치어의 테스트 위치 고정
+- 말풍선 거리, 가림, 겹침, 전체뷰 자동 검사
+- Sea 코드 변경 시 검사 자동 연동
+- 오류 수정 담당 AI 에이전트 연결
 
-A passing smoke test **does not** mean that world-space label behavior is verified.
-Avoid enabling production-impacting automatic changes without approval.
+기본 실행 검사 통과는 말풍선 검수 완료를 의미하지 않는다.
