@@ -12,9 +12,7 @@ test('Sea loads without fatal page errors and exposes the aquaculture UI',async(
  expect(errors,'Uncaught JavaScript exceptions').toEqual([]);
 });
 
-test('overview hides aquaculture world objects and labels',async({page})=>{
- await page.goto('/',{waitUntil:'domcontentloaded'});
- await expect(page.locator('canvas').first()).toBeVisible({timeout:30000});
- // This test requires a deterministic test hook in Sea. Never report it as passed before integration.
+test('overview hides aquaculture world objects and labels',async()=>{
+ // Skip before opening the game: the deterministic Sea overview test hook is not implemented yet.
  test.skip(true,'Pending Sea test hook: setOverview and inspect aquaculture world root visibility');
 });
