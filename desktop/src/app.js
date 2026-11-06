@@ -19,21 +19,24 @@ let latest = { state:'IDLE',run:null }, state='IDLE', direction=1, alertRun=null
 let movementTimer, behaviorTimer, bubbleTimer, maskTimer, moving=false, interacting=false;
 let maskBusy=false, maskDirty=false;
 let roaming='IDLE';
-let greetingTimer, greetingEndTimer, greetingActive=false;
+let greetingTimer, greetingEndTimer, greetingActive=false, greetingSequence=0, activeGreetingSrc='';
 const greetingSrc=new URL('./shared/hina/assets/greeting.gif',import.meta.url).href;
+function playGreeting(){
+  if(state!=='IDLE' || !displayAsset('IDLE').localIdleStyle || interacting || !$('#settings').hidden || greetingActive)return false;
+  greetingActive=true;
+  // Each greeting gets a fresh URL so WebView restarts frame 1 instead of retaining the last GIF frame.
+  activeGreetingSrc=greetingSrc+'?play='+ ++greetingSequence;
+  clearTimeout(greetingEndTimer);
+  render('IDLE',true);
+  greetingEndTimer=setTimeout(()=>{greetingActive=false;activeGreetingSrc='';render('IDLE',true);},1680);
+  return true;
+}
 function scheduleGreeting(){
   clearTimeout(greetingTimer);
-  if(!displayAsset('IDLE').localIdleStyle)return;
   greetingTimer=setTimeout(()=>{
-    if(state==='IDLE' && displayAsset(state).localIdleStyle && !interacting && $('#settings').hidden){
-      greetingActive=true;
-      document.body.classList.remove('idle-breath');
-      $('#character').src=greetingSrc;
-      clearTimeout(greetingEndTimer);
-      greetingEndTimer=setTimeout(()=>{greetingActive=false;render(state,true);},1680);
-    }
+    playGreeting();
     scheduleGreeting();
-  },22000+Math.random()*18000);
+  },12000+Math.random()*8000);
 }
 function showBubble(text,timeout=0) {
   clearTimeout(bubbleTimer); $('#bubble').textContent=text; $('#bubble').hidden=!text;
@@ -42,8 +45,8 @@ function showBubble(text,timeout=0) {
 }
 function render(next,force=false) {
   const asset=displayAsset(next);
-  if(next!=='IDLE'){greetingActive=false;clearTimeout(greetingEndTimer);}
-  const src=greetingActive&&next==='IDLE'&&asset.localIdleStyle?greetingSrc:asset.src;
+  if(next!=='IDLE'){greetingActive=false;activeGreetingSrc='';clearTimeout(greetingEndTimer);}
+  const src=greetingActive&&next==='IDLE'&&asset.localIdleStyle?activeGreetingSrc:asset.src;
   if(state!==next || force || $('#character').src!==src) {
     state=next;if($('#character').src!==src)$('#character').src=src;$('#asset-status').textContent=asset.label;
     document.body.dataset.state=state;startMovement();refreshMaskTimer();
