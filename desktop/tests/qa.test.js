@@ -34,3 +34,10 @@ test('rate limit prevents immediate repeated manual requests',async()=>{
   let calls=0;const p=new QAPoller({onResult:()=>assert.fail(),onError:()=>{},fetcher:async()=>{calls++;return new Response('',{status:429,headers:{'retry-after':'600'}});}});
   try {await p.start();await p.poll();assert.equal(calls,1);assert.ok(p.notBefore>Date.now()+500000);}finally{p.stop();}
 });
+
+test('default fetch preserves the browser global receiver',async()=>{
+  const original=globalThis.fetch;
+  globalThis.fetch=async function(){assert.equal(this,globalThis);return Response.json({workflow_runs:[]});};
+  let called=false;const p=new QAPoller({onResult:()=>{called=true;},onError:e=>{throw e;}});
+  try{await p.start();assert.equal(called,true);}finally{p.stop();globalThis.fetch=original;}
+});

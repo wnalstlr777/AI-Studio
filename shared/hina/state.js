@@ -35,7 +35,7 @@ export class EventLedger {
   save() { return { ready: this.ready, floor: this.floor, seen: [...this.seen] }; }
 }
 export class QAPoller {
-  constructor({ onResult, onError, fetcher = fetch, interval = 120000 }) {
+  constructor({ onResult, onError, fetcher = (...args) => globalThis.fetch(...args), interval = 120000 }) {
     Object.assign(this, { onResult, onError, fetcher, interval }); this.delay = interval; this.stopped = true; this.notBefore = 0;
   }
   start() { this.stopped = false; return this.poll(); }
