@@ -1,23 +1,23 @@
-# World-space UI rules — v1
+# 3D 월드 UI 공통 규칙 — v1.0
 
-Applies to labels, speech bubbles, interaction prompts, and markers attached to 3D objects.
+3D 오브젝트에 연결되는 말풍선, 이름표, 상호작용 안내, 위치 표시 등에 적용한다.
 
-1. **World anchor**: derive screen position from the target object's current world coordinates, not the player's position or a fixed viewport offset.
-2. **Proximity**: show only within a feature-defined distance; hide immediately outside the threshold.
-3. **Occlusion**: hide when opaque world geometry blocks the line of sight from the camera to the target. Exclude only deliberately non-occluding surfaces/effects.
-4. **Avatar overlap**: do not cover the local avatar's head or critical interaction controls.
-5. **Viewport bounds**: hide when clipped or behind the camera; never pin a disappearing world label to a screen edge.
-6. **Overview mode**: hide gameplay world labels and markers unless explicitly designed for overview.
-7. **Responsive behavior**: test desktop and mobile viewport sizes.
-8. **No duplicates**: one authoritative label per target and purpose; clean up on state changes.
+1. **월드 좌표 고정**: 플레이어 위치나 화면 고정 좌표가 아니라 대상 오브젝트의 현재 월드 좌표를 화면에 투영한다.
+2. **거리 판정**: 기능별로 정한 거리 안에서만 표시하고 범위를 벗어나면 즉시 숨긴다.
+3. **가림 판정**: 카메라와 대상 사이에 불투명한 월드 에셋이 있으면 숨긴다. 가림 판정에서 제외할 수 있는 것은 의도적으로 예외 처리한 수면이나 효과 등에 한정한다.
+4. **캐릭터 겹침 방지**: 플레이어 캐릭터의 머리나 주요 조작 UI를 가리지 않는다.
+5. **화면 경계 처리**: 카메라 뒤에 있거나 화면 밖으로 잘리면 숨긴다. 월드 말풍선을 화면 가장자리에 강제로 붙이지 않는다.
+6. **전체뷰 처리**: 전체뷰용으로 명시적으로 설계된 요소를 제외하고 플레이용 말풍선과 표시물을 숨긴다.
+7. **PC·모바일 공통 적용**: 두 화면 크기에서 동일한 원칙을 검수한다.
+8. **중복 방지**: 하나의 대상과 목적에 대해 대표 말풍선 하나만 유지하며 상태 변경 시 기존 표시를 정리한다.
 
-## Minimum regression scenarios
-- Approach target: label appears at the correct world position.
-- Move away: label disappears.
-- Orbit camera: label remains anchored to target, not avatar.
-- Put opaque ship geometry between camera and target: label disappears.
-- Move avatar into label screen region: label avoids covering avatar.
-- Toggle overview: gameplay labels disappear.
-- Switch targets/modes: stale inline CSS coordinates do not persist.
+## 최소 회귀 검수 항목
+- 대상에 접근하면 정확한 대상 위치에 말풍선이 표시되는가?
+- 대상에서 멀어지면 말풍선이 사라지는가?
+- 카메라를 회전해도 말풍선이 캐릭터가 아니라 대상에 고정되는가?
+- 배와 같은 불투명 에셋 뒤에 대상이 가려지면 말풍선도 숨겨지는가?
+- 캐릭터가 말풍선과 화면상 겹칠 때 머리를 가리지 않는가?
+- 전체뷰 전환 시 플레이용 말풍선이 숨겨지는가?
+- 대상이나 모드를 바꿨을 때 이전 화면 좌표가 남지 않는가?
 
-Tests must verify behavior in a running browser; source review alone is not a pass.
+**검수 원칙:** 실제 브라우저에서 동작을 재현해야 통과로 기록한다. 소스 코드만 확인한 것은 검수 완료로 취급하지 않는다.
