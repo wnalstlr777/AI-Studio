@@ -5,7 +5,11 @@ let shownSuccess=null, successTimer;
 function display(state,message='') {
   $('#hina-secretary').dataset.state=state;
   $('#hina-message').textContent=message;$('#hina-message').hidden=!message;
-  const asset=assetFor(state);$('#hina-character').src=asset.src;$('#hina-asset').textContent=asset.label;
+  const asset=assetFor(state);const img=$('#hina-character');
+  // Preserve original secretary artwork if the approved alert GIF has not been uploaded yet.
+  img.onerror=()=>{img.onerror=null;img.src=assetFor('IDLE').src;$('#hina-asset').textContent='오류 GIF 파일 업로드 대기 · 원본 표시';};
+  if(img.dataset.assetState!==state || img.src!==asset.src){img.dataset.assetState=state;img.src=asset.src;}
+  $('#hina-asset').textContent=asset.label;
 }
 display('IDLE');
 const poller=new QAPoller({storage:localStorage,
