@@ -1,7 +1,8 @@
 // User-supplied originals. Only the greeting is animated; never invent other motions.
 export const animations = {
   IDLE: { src:'./assets/secretary.png', complete:true, animated:true },
-  ...Object.fromEntries(['WALK','REST','WORK','SUCCESS','ALERT'].map(state=>[state,{src:'./assets/secretary.png',complete:false,animated:false}]))
+  ALERT: {src:'./assets/hina-alert.gif',complete:true,animated:true},
+  ...Object.fromEntries(['WALK','REST','WORK','SUCCESS'].map(state=>[state,{src:'./assets/secretary.png',complete:false,animated:false}]))
 };
 export function assetFor(state) {
   const asset=animations[state] || {src:'./assets/secretary.png',complete:false,animated:false};
