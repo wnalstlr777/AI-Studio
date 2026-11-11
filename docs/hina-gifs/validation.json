@@ -22,12 +22,12 @@
           "height": 614,
           "durationMs": 220,
           "bounds": [
-            117,
+            118,
             131,
             388,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -36,12 +36,12 @@
           "height": 614,
           "durationMs": 220,
           "bounds": [
-            117,
-            143,
-            393,
+            114,
+            131,
+            397,
             610
           ],
-          "footCenter": 255,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -50,12 +50,12 @@
           "height": 614,
           "durationMs": 220,
           "bounds": [
-            116,
-            160,
-            435,
+            108,
+            131,
+            448,
             610
           ],
-          "footCenter": 255,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -64,12 +64,12 @@
           "height": 614,
           "durationMs": 220,
           "bounds": [
-            112,
-            161,
-            397,
+            103,
+            131,
+            407,
             610
           ],
-          "footCenter": 255,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -78,12 +78,12 @@
           "height": 614,
           "durationMs": 220,
           "bounds": [
-            116,
-            154,
-            396,
+            109,
+            131,
+            404,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -92,12 +92,12 @@
           "height": 614,
           "durationMs": 220,
           "bounds": [
-            116,
-            141,
-            395,
+            114,
+            131,
+            398,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -106,12 +106,12 @@
           "height": 614,
           "durationMs": 220,
           "bounds": [
-            117,
-            138,
-            391,
+            115,
+            131,
+            393,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -121,11 +121,11 @@
           "durationMs": 220,
           "bounds": [
             117,
-            135,
-            389,
+            131,
+            390,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         }
       ]
@@ -139,12 +139,12 @@
           "height": 614,
           "durationMs": 180,
           "bounds": [
-            107,
+            108,
             131,
-            398,
+            399,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -153,12 +153,12 @@
           "height": 614,
           "durationMs": 180,
           "bounds": [
-            107,
+            108,
             131,
-            427,
+            428,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -169,10 +169,10 @@
           "bounds": [
             108,
             131,
-            397,
+            398,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -181,12 +181,12 @@
           "height": 614,
           "durationMs": 180,
           "bounds": [
-            106,
+            107,
             131,
-            449,
+            450,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -196,11 +196,11 @@
           "durationMs": 180,
           "bounds": [
             107,
-            132,
-            454,
+            131,
+            455,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -210,11 +210,11 @@
           "durationMs": 180,
           "bounds": [
             107,
-            132,
-            404,
+            131,
+            405,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -224,11 +224,11 @@
           "durationMs": 180,
           "bounds": [
             108,
-            132,
-            403,
+            131,
+            404,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -238,11 +238,11 @@
           "durationMs": 180,
           "bounds": [
             108,
-            132,
-            404,
+            131,
+            405,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         }
       ]
@@ -272,10 +272,10 @@
           "bounds": [
             120,
             131,
-            415,
+            416,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -298,12 +298,12 @@
           "height": 614,
           "durationMs": 200,
           "bounds": [
-            117,
+            118,
             131,
-            454,
+            455,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -313,11 +313,11 @@
           "durationMs": 200,
           "bounds": [
             120,
-            133,
-            497,
+            131,
+            499,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         },
         {
@@ -326,12 +326,12 @@
           "height": 614,
           "durationMs": 200,
           "bounds": [
-            118,
-            135,
-            494,
+            119,
+            131,
+            497,
             610
           ],
-          "footCenter": 255,
+          "footCenter": 256.5,
           "cornerAlpha": 0
         },
         {
@@ -340,9 +340,9 @@
           "height": 614,
           "durationMs": 200,
           "bounds": [
-            121,
-            133,
-            488,
+            120,
+            131,
+            489,
             610
           ],
           "footCenter": 256,
@@ -355,29 +355,14 @@
           "durationMs": 200,
           "bounds": [
             120,
-            133,
-            390,
+            131,
+            391,
             610
           ],
-          "footCenter": 255.5,
+          "footCenter": 256,
           "cornerAlpha": 0
         }
       ]
     }
-  ],
-  "nodeTests": 33,
-  "windowsCI": {
-    "commit": "09ab79b18544c0b68604f88679d7d939508d2daf",
-    "run": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42941572835",
-    "status": "success",
-    "duration": "6m 55s",
-    "installer": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42941572835/artifacts/13820663885",
-    "zipSha256": "0db31600b85919545351efac96e769fa7cad94b3092e02d7b5488c9cabab57a4"
-  },
-  "visualLimitations": [
-    "Original head/body proportion differences retained; no anatomical redrawing",
-    "Original IDLE head movement retained"
-  ],
-  "publishedToMain": false,
-  "userPCVerified": false
+  ]
 }
