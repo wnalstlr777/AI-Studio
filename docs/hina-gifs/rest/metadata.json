@@ -1,0 +1,132 @@
+{
+  "status": "approved for GitHub publication",
+  "file": "shared/hina/assets/hina-rest.gif",
+  "bytes": 440367,
+  "sha256": "c343968a49008a7d70b927fe4450de6dcc5465d69cf513b9e9f6a3129c62053b",
+  "width": 512,
+  "height": 614,
+  "frames": 8,
+  "durationMs": 1600,
+  "loop": true,
+  "characterHeight": 480,
+  "headCenterX": 256,
+  "footY": 610,
+  "sourceSequence": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    3,
+    2,
+    1
+  ],
+  "direction": "front-facing quiet rest",
+  "upperBody": "full original cel, no upper/lower splicing",
+  "framesTransforms": [
+    {
+      "sourceBounds": [
+        116,
+        15,
+        326,
+        427
+      ],
+      "scale": 1.1598113293028547,
+      "translation": [
+        -0.8982094405823204,
+        114.6007510583782
+      ]
+    },
+    {
+      "sourceBounds": [
+        117,
+        15,
+        327,
+        427
+      ],
+      "scale": 1.162227602905569,
+      "translation": [
+        -2.595641646489071,
+        113.56658595641647
+      ]
+    },
+    {
+      "sourceBounds": [
+        117,
+        16,
+        327,
+        427
+      ],
+      "scale": 1.1650485436893203,
+      "translation": [
+        -3.2233009708737654,
+        112.35922330097088
+      ]
+    },
+    {
+      "sourceBounds": [
+        117,
+        17,
+        327,
+        427
+      ],
+      "scale": 1.167883211678832,
+      "translation": [
+        -3.854014598540118,
+        111.14598540145988
+      ]
+    },
+    {
+      "sourceBounds": [
+        117,
+        20,
+        327,
+        427
+      ],
+      "scale": 1.1764705882352942,
+      "translation": [
+        -5.764705882352928,
+        107.47058823529409
+      ]
+    },
+    {
+      "sourceBounds": [
+        118,
+        18,
+        327,
+        427
+      ],
+      "scale": 1.1682977536636072,
+      "translation": [
+        -4.530399066984387,
+        110.96856143197607
+      ]
+    },
+    {
+      "sourceBounds": [
+        118,
+        16,
+        327,
+        427
+      ],
+      "scale": 1.1650485436893203,
+      "translation": [
+        -3.805825242718413,
+        112.35922330097088
+      ]
+    },
+    {
+      "sourceBounds": [
+        118,
+        16,
+        327,
+        427
+      ],
+      "scale": 1.1650485436893203,
+      "translation": [
+        -3.805825242718413,
+        112.35922330097088
+      ]
+    }
+  ]
+}

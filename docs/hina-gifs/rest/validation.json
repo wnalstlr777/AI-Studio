@@ -1,0 +1,104 @@
+{
+  "scope": "GIF geometry/timing and frame comparison, Windows not tested",
+  "frames": [
+    {
+      "frame": 0,
+      "bounds": [
+        134,
+        131,
+        379,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    },
+    {
+      "frame": 1,
+      "bounds": [
+        133,
+        131,
+        378,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    },
+    {
+      "frame": 2,
+      "bounds": [
+        134,
+        131,
+        379,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    },
+    {
+      "frame": 3,
+      "bounds": [
+        133,
+        131,
+        379,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    },
+    {
+      "frame": 4,
+      "bounds": [
+        132,
+        131,
+        380,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    },
+    {
+      "frame": 5,
+      "bounds": [
+        133,
+        131,
+        379,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    },
+    {
+      "frame": 6,
+      "bounds": [
+        134,
+        131,
+        379,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    },
+    {
+      "frame": 7,
+      "bounds": [
+        133,
+        131,
+        378,
+        611
+      ],
+      "height": 480,
+      "durationMs": 200
+    }
+  ],
+  "cyclicDifferences": [
+    1.9916006082043973,
+    2.671769232237378,
+    2.9240134173961727,
+    2.567787592884772,
+    2.567787592884772,
+    2.9240134173961727,
+    2.671769232237378,
+    1.9916006082043973
+  ],
+  "loop": 0
+}

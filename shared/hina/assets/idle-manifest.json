@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "version": "2026.11.11-shared-gifs.3",
+  "version": "2026.11.11-shared-gifs.4",
   "assets": {
     "IDLE": {
       "file": "hina-idle.gif",
@@ -33,12 +33,19 @@
       "centerX": 256
     },
     "REST": {
-      "file": "secretary.png",
-      "format": "png",
-      "bytes": 1184573,
-      "sha256": "96c93b663d3018cf5a8c9d8ed280ec50b207ccc243f9ef3e8e4e478f72e00550",
-      "animated": false,
-      "complete": false
+      "file": "hina-rest.gif",
+      "format": "gif",
+      "bytes": 440367,
+      "sha256": "c343968a49008a7d70b927fe4450de6dcc5465d69cf513b9e9f6a3129c62053b",
+      "animated": true,
+      "complete": true,
+      "frames": 8,
+      "durationMs": 1600,
+      "loop": true,
+      "width": 512,
+      "height": 614,
+      "centerX": 256,
+      "footY": 610
     },
     "WORK": {
       "file": "secretary.png",
