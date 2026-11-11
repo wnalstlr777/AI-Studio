@@ -9,6 +9,7 @@
 - 512×614 투명 GIF. 기준 신장 480px, 발 Y=610, 중심 X=256(픽셀 반올림 ±1px).
   손짓/말풍선 효과가 오른쪽으로 뻗는 프레임도 잘리지 않도록 같은 기준 신장을 사용했다.
   ALERT 기준 배율은 IDLE/NEWS보다 약 1.9% 키워 세 동작의 기본 신장을 맞췄다.
+- 기준 프레임의 가시 폭은 IDLE 272px, ALERT 292px, NEWS 270px이다. 원본의 머리·몸 비율 차이는 남아 있으며, 이를 없애기 위해 신체를 비선형 변형하지 않았다. 기준 신장·발·중심 정렬과 별도로 시각 승인이 필요하다.
 - 원본 IDLE의 고개 움직임은 보존했다. 머리·몸·팔을 비선형 변형하거나 프레임을 재생성하지 않았다.
 - 원본 ZIP은 [sources/hina](../../sources/hina/hina_3_gifs_original.zip)에 별도 보존했다.
   `scripts/normalize-hina-gifs.mjs`가 원본의 8프레임/시간을 유지하여 정렬 GIF와 manifest를 갱신한다.
@@ -52,3 +53,15 @@ npm run test:idle-browser
 다른 부서 에이전트나 외부 뉴스 백엔드를 새로 연결한 것은 아니다.
 
 검수 브랜치의 Windows CI가 성공한 설치본만 제공한다. 사용자 PC 확인과 정렬본 운영 반영 승인은 별도다.
+
+## 검수 결과 및 설치본
+
+- 커밋 `09ab79b` / 검수 브랜치 `hina-shared-gifs-v1`. 운영 main과 Pages는 변경하지 않았다.
+- Node 33개, 공용 GIF 브라우저 10항목, 기존 입력·캐시 복구 및 8종 Idle/403 브라우저 17항목 통과.
+- [Windows 빌드·실제 EXE 검사](https://github.com/wnalstlr777/AI-Studio/actions/runs/42941572835) 성공 (6분 55초).
+  실제 EXE에서 3종 GIF 표시와 NEWS→IDLE 복귀, 기존 입력·원격 캐시·8종/403 회귀를 확인했다.
+- [검수용 v1.3.0 설치 ZIP (15.3 MB)](https://github.com/wnalstlr777/AI-Studio/actions/runs/42941572835/artifacts/13820663885), GitHub 로그인 필요.
+  기존 히나 종료 후 설치하며 사용자 PC의 실제 표시 확인은 남아 있다.
+- ZIP SHA-256: `0db31600b85919545351efac96e769fa7cad94b3092e02d7b5488c9cabab57a4`.
+- 외부 이벤트는 같은 id를 재생하지 않는다. 다른 새 id는 캐시 Blob으로 첫 프레임부터 다시 시작한다.
+- 운영 반영은 AGENTS.md의 “사용자 승인 전에는 GitHub 운영 에셋 교체·배포를 하지 않는다”에 따라 미리보기 확인 후 진행한다.

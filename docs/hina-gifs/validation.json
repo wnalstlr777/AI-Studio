@@ -364,5 +364,20 @@
         }
       ]
     }
-  ]
+  ],
+  "nodeTests": 33,
+  "windowsCI": {
+    "commit": "09ab79b18544c0b68604f88679d7d939508d2daf",
+    "run": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42941572835",
+    "status": "success",
+    "duration": "6m 55s",
+    "installer": "https://github.com/wnalstlr777/AI-Studio/actions/runs/42941572835/artifacts/13820663885",
+    "zipSha256": "0db31600b85919545351efac96e769fa7cad94b3092e02d7b5488c9cabab57a4"
+  },
+  "visualLimitations": [
+    "Original head/body proportion differences retained; no anatomical redrawing",
+    "Original IDLE head movement retained"
+  ],
+  "publishedToMain": false,
+  "userPCVerified": false
 }
