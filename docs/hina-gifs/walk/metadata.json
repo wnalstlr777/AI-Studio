@@ -1,0 +1,132 @@
+{
+  "status": "approved for GitHub publication",
+  "file": "shared/hina/assets/hina-walk.gif",
+  "bytes": 439213,
+  "sha256": "1c065a61eff60262320525e57eb206a62902f5b6f1aa6f330d9a2c4bad9ea80f",
+  "width": 512,
+  "height": 614,
+  "frames": 8,
+  "durationMs": 800,
+  "loop": true,
+  "characterHeight": 480,
+  "headCenterX": 256,
+  "footY": 610,
+  "sourceSequence": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "direction": "right-facing throughout",
+  "upperBody": "full original cel, no upper/lower splicing",
+  "framesTransforms": [
+    {
+      "sourceBounds": [
+        105,
+        8,
+        320,
+        432
+      ],
+      "scale": 1.1294117647058823,
+      "translation": [
+        15.43529411764706,
+        121.96470588235297
+      ]
+    },
+    {
+      "sourceBounds": [
+        105,
+        8,
+        320,
+        433
+      ],
+      "scale": 1.1267605633802817,
+      "translation": [
+        16,
+        121.9859154929577
+      ]
+    },
+    {
+      "sourceBounds": [
+        105,
+        8,
+        324,
+        433
+      ],
+      "scale": 1.1267605633802817,
+      "translation": [
+        15.436619718309856,
+        121.9859154929577
+      ]
+    },
+    {
+      "sourceBounds": [
+        106,
+        8,
+        331,
+        433
+      ],
+      "scale": 1.1267605633802817,
+      "translation": [
+        14.873239436619713,
+        121.9859154929577
+      ]
+    },
+    {
+      "sourceBounds": [
+        105,
+        8,
+        320,
+        432
+      ],
+      "scale": 1.1294117647058823,
+      "translation": [
+        15.43529411764706,
+        121.96470588235297
+      ]
+    },
+    {
+      "sourceBounds": [
+        105,
+        8,
+        320,
+        432
+      ],
+      "scale": 1.1317696180768757,
+      "translation": [
+        14.933071349625465,
+        120.94375537271279
+      ]
+    },
+    {
+      "sourceBounds": [
+        105,
+        8,
+        321,
+        432
+      ],
+      "scale": 1.1317696180768757,
+      "translation": [
+        14.367186540587028,
+        120.94375537271279
+      ]
+    },
+    {
+      "sourceBounds": [
+        106,
+        8,
+        338,
+        432
+      ],
+      "scale": 1.1317696180768757,
+      "translation": [
+        13.801301731548591,
+        120.94375537271279
+      ]
+    }
+  ]
+}

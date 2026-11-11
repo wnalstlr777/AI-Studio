@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "2026.11.11-shared-gifs.2",
+  "version": "2026.11.11-shared-gifs.3",
   "assets": {
     "IDLE": {
       "file": "hina-idle.gif",
@@ -18,12 +18,19 @@
       "footY": 610
     },
     "WALK": {
-      "file": "walk.gif",
+      "file": "hina-walk.gif",
       "format": "gif",
-      "bytes": 812044,
-      "sha256": "268af6f27a8d0095bf8df2c4ba32f7c2871192813c5e13df612719c4d86934ec",
+      "bytes": 439213,
+      "sha256": "1c065a61eff60262320525e57eb206a62902f5b6f1aa6f330d9a2c4bad9ea80f",
       "animated": true,
-      "complete": true
+      "complete": true,
+      "frames": 8,
+      "durationMs": 800,
+      "loop": true,
+      "width": 512,
+      "height": 614,
+      "footY": 610,
+      "centerX": 256
     },
     "REST": {
       "file": "secretary.png",

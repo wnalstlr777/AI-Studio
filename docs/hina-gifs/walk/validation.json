@@ -1,0 +1,104 @@
+{
+  "scope": "decoder geometry and timing; contact-sheet visual review; Windows not tested",
+  "frames": [
+    {
+      "frame": 0,
+      "bounds": [
+        134,
+        131,
+        378,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    },
+    {
+      "frame": 1,
+      "bounds": [
+        135,
+        131,
+        378,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    },
+    {
+      "frame": 2,
+      "bounds": [
+        134,
+        131,
+        382,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    },
+    {
+      "frame": 3,
+      "bounds": [
+        134,
+        131,
+        389,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    },
+    {
+      "frame": 4,
+      "bounds": [
+        134,
+        131,
+        378,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    },
+    {
+      "frame": 5,
+      "bounds": [
+        134,
+        131,
+        379,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    },
+    {
+      "frame": 6,
+      "bounds": [
+        134,
+        131,
+        379,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    },
+    {
+      "frame": 7,
+      "bounds": [
+        133,
+        131,
+        398,
+        611
+      ],
+      "height": 480,
+      "durationMs": 100
+    }
+  ],
+  "cyclicDifferences": [
+    7.932151173147394,
+    4.937640758601384,
+    5.659748288629886,
+    8.013704480099756,
+    8.015859597668975,
+    4.8286124860036646,
+    8.295135796264251,
+    6.546227669482899
+  ],
+  "loop": 0
+}
