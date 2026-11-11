@@ -68,3 +68,10 @@ Windows CI가 성공한 설치본만 제공한다. 사용자 PC에서의 최종 
 - 24프레임 모두 높이 480px, 상단 Y=131, 발 Y=610, 발 중심 X=256±1px. 캔버스 512×614, 원본 8프레임·시간·투명 배경 보존.
 - 공용 GIF 검수 10항목 통과. 최종 Windows 빌드와 Pages 결과는 아래에 기록한다.
 - 공통/데스크톱 AGENTS.md에 전체 프레임 스케일 통일 및 실측·재생 검수 양식을 필수로 추가했다.
+
+- 운영 커밋 `2a9ba68`을 main에 반영했다.
+- [Pages 배포](https://github.com/wnalstlr777/AI-Studio/actions/runs/42945927384) 성공 (24초). 이 환경에서는 Pages 도메인 직접 접근이 차단되어 운영 URL의 시각 검수는 하지 못했다. 로컬 PC/모바일 렌더·전환 검수는 통과했다.
+- [Windows v1.3.1 빌드 및 실제 EXE 검사](https://github.com/wnalstlr777/AI-Studio/actions/runs/42945927372) 성공 (7분). 매니페스트, Node 33개, 입력·원격 캐시, Idle 17항목, 공용 GIF 10항목, Rust 및 네이티브 검사 통과.
+- [v1.3.1 설치 ZIP (15.4 MB)](https://github.com/wnalstlr777/AI-Studio/actions/runs/42945927372/artifacts/13822997882), GitHub 로그인 필요. 압축을 풀고 기존 히나 종료 후 설치한다. 사용자 PC에서의 최종 표시는 별도 확인이 필요하다.
+- ZIP SHA-256: `ddd6fa2899bfeccfb5f78341f7e7a53f847a7d676b7a9abdd73ed95f9977753c`.
+- [Windows QA 결과](https://github.com/wnalstlr777/AI-Studio/actions/runs/42945927372/artifacts/13822504033).
