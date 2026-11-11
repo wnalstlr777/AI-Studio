@@ -1,0 +1,55 @@
+import '../scripts/build.mjs';
+import {chromium} from 'playwright-core';
+import {createServer} from 'node:http';
+import {fileURLToPath} from 'node:url';
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {resolve,extname,sep} from 'node:path';
+import assert from 'node:assert/strict';
+const root=resolve(fileURLToPath(new URL('../../',import.meta.url))),results=[],output=resolve(root,'desktop/qa-results/shared-gifs');
+const server=createServer(async(req,res)=>{const p=resolve(root,'.'+new URL(req.url,'http://localhost').pathname.replace(/\/$/,'/index.html'));if(!p.startsWith(root+sep)){res.writeHead(403).end();return;}try{res.setHeader('content-type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.gif':'image/gif','.png':'image/png','.webp':'image/webp','.json':'application/json'})[extname(p)]||'application/octet-stream');if(extname(p)==='.gif')res.setHeader('Cache-Control','max-age=3600');res.end(await readFile(p));}catch{res.writeHead(404).end();}});
+await new Promise(r=>server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${server.address().port}`;
+const browser=await chromium.launch(process.platform==='win32'?{channel:'msedge',headless:true}:{executablePath:process.env.HINA_BROWSER_PATH||'/usr/bin/chromium',headless:true,args:['--no-sandbox']});
+try{
+ await mkdir(output,{recursive:true});
+ const audit=await browser.newPage();await audit.goto(base+'/docs/hina-gifs/preview.html');
+ const geometry=await audit.evaluate(async()=>{
+  const out=[];window.contact=[];
+  for(const name of ['idle','alert','news']){
+   const data=await(await fetch('/shared/hina/assets/hina-'+name+'.gif')).arrayBuffer(),d=new ImageDecoder({data,type:'image/gif'});await d.tracks.ready;const c=document.createElement('canvas');c.width=512;c.height=614;const ctx=c.getContext('2d',{willReadFrequently:true}),frames=[];
+   for(let i=0;i<d.tracks.selectedTrack.frameCount;i++){const {image}=await d.decode({frameIndex:i});ctx.clearRect(0,0,512,614);ctx.drawImage(image,0,0);const b=ctx.getImageData(0,0,512,614).data;let left=512,right=0,top=614,bottom=0;
+    for(let y=0;y<614;y++)for(let x=0;x<512;x++)if(b[(y*512+x)*4+3]>128){left=Math.min(left,x);right=Math.max(right,x);top=Math.min(top,y);bottom=Math.max(bottom,y);}
+    let fl=512,fr=0;for(let y=bottom-7;y<=bottom;y++)for(let x=0;x<512;x++)if(b[(y*512+x)*4+3]>128){fl=Math.min(fl,x);fr=Math.max(fr,x);}
+    frames.push({index:i,width:image.displayWidth,height:image.displayHeight,durationMs:image.duration/1000,bounds:[left,top,right,bottom],footCenter:(fl+fr)/2,cornerAlpha:b[3]});window.contact.push({name,index:i,src:c.toDataURL()});image.close();
+   }
+   d.close();out.push({name,frames});
+  }return out;
+ });
+ for(const a of geometry){assert.equal(a.frames.length,8);for(const f of a.frames){assert.equal(f.width,512);assert.equal(f.height,614);assert.equal(f.bounds[3],610);assert.ok(Math.abs(f.footCenter-256)<=1);assert.equal(f.cornerAlpha,0);assert.ok(f.bounds[0]>0&&f.bounds[2]<511);}assert.equal(a.frames[0].bounds[1],131);}
+ results.push('24 decoded frames: canvas, body reference height, center/feet, transparent corners, no clipping');
+ await audit.evaluate(()=>{document.body.replaceChildren();document.body.style.cssText='margin:16px;background:#142333;color:white;font:14px system-ui';const h=document.createElement('h1');h.textContent='공용 GIF 3종 · 원본 8프레임 정렬 검수';document.body.append(h);const grid=document.createElement('div');grid.style.cssText='display:grid;grid-template-columns:repeat(8,140px);gap:6px';for(const p of window.contact){const cell=document.createElement('div'),img=document.createElement('img');img.src=p.src;img.style.cssText='width:140px;background:repeating-conic-gradient(#dce3e7 0% 25%,#b7c5ce 0% 50%) 0/16px 16px';const label=document.createElement('div');label.textContent=p.name+' '+p.index;cell.append(img,label);grid.append(cell);}document.body.append(grid);});await audit.setViewportSize({width:1200,height:700});await audit.screenshot({path:output+'/contact-sheet.png',fullPage:true});
+ for(const [kind,url]of [['web','/'],['desktop','/desktop/dist/']]){
+  const context=await browser.newContext({viewport:{width:kind==='web'?1440:320,height:kind==='web'?1000:420}}),page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.addInitScript(()=>{localStorage.setItem('hina.settings',JSON.stringify({roam:false,notifications:false,top:true,size:200}));});
+  let runs=[];await page.route('https://api.github.com/**',r=>r.fulfill({json:{workflow_runs:runs}}));await page.route('https://wnalstlr777.github.io/**',r=>r.abort());await page.clock.install();await page.goto(base+url+'?hinaTest=1');
+  const image=page.locator(kind==='web'?'#hina-character':'#character'),stateSelector=kind==='web'?'#hina-secretary':'body';await image.evaluate(img=>img.decode());const initial=await image.boundingBox();
+  for(const state of ['ALERT','IDLE','NEWS']){await page.evaluate(s=>window.hinaPreviewState(s),state);await page.waitForFunction(({selector,state})=>document.querySelector(selector).dataset.assetSrc?.endsWith('hina-'+state.toLowerCase()+'.gif'),{selector:kind==='web'?'#hina-character':'#character',state});await image.evaluate(img=>img.decode());assert.equal(await page.locator(stateSelector).getAttribute('data-state'),state);const box=await image.boundingBox();assert.deepEqual(box,initial);assert.ok((await image.getAttribute('data-asset-src')).endsWith('hina-'+state.toLowerCase()+'.gif'));}
+  await page.clock.fastForward(1700);assert.equal(await page.locator(stateSelector).getAttribute('data-state'),'IDLE');await page.evaluate(()=>window.hinaPreviewState(null));
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('hina:news',{detail:{id:'test-result-1'}})));assert.equal(await page.locator(stateSelector).getAttribute('data-state'),'NEWS');await image.evaluate(img=>img.decode());await page.clock.fastForward(1700);await page.evaluate(()=>window.dispatchEvent(new CustomEvent('hina:news',{detail:{id:'test-result-1'}})));assert.notEqual(await page.locator(stateSelector).getAttribute('data-state'),'NEWS');
+  await page.reload();await page.waitForFunction(()=>typeof window.hinaPreviewState==='function');await page.evaluate(()=>window.dispatchEvent(new CustomEvent('hina:news',{detail:{id:'test-result-1'}})));assert.notEqual(await page.locator(stateSelector).getAttribute('data-state'),'NEWS');
+  results.push(kind+': IDLE/ALERT/NEWS, fixed image box, one-shot return, persistent news dedupe');
+  await page.evaluate(()=>window.dispatchEvent(new CustomEvent('hina:news',{detail:{id:'test-replay-1'}})));await page.waitForFunction(selector=>document.querySelector(selector).src.startsWith('blob:'),kind==='web'?'#hina-character':'#character');const play1=await image.getAttribute('src');await page.evaluate(()=>window.dispatchEvent(new CustomEvent('hina:news',{detail:{id:'test-replay-2'}})));await page.waitForFunction(({selector,previous})=>document.querySelector(selector).src.startsWith('blob:')&&document.querySelector(selector).src!==previous,{selector:kind==='web'?'#hina-character':'#character',previous:play1});const play2=await image.getAttribute('src');await page.evaluate(()=>window.dispatchEvent(new CustomEvent('hina:news',{detail:{id:'test-replay-2'}})));assert.equal(await image.getAttribute('src'),play2);await image.evaluate(img=>img.decode());await page.clock.fastForward(1700);results.push(kind+': distinct NEWS restarts cached GIF decoder; duplicate does not replay');
+  const run={id:800001,run_attempt:1,status:'completed',conclusion:'success',created_at:new Date(Date.now()+86400000).toISOString(),html_url:'https://github.com/wnalstlr777/AI-Studio/actions/runs/800001'};
+  runs=[run];await page.clock.fastForward(300001);await page.waitForFunction(selector=>document.querySelector(selector).dataset.state==='NEWS',stateSelector);assert.match(await page.locator(kind==='web'?'#hina-message':'#bubble').innerText(),/새로운 소식/);await image.evaluate(img=>img.decode());await page.clock.fastForward(1700);await page.clock.fastForward(300001);assert.notEqual(await page.locator(stateSelector).getAttribute('data-state'),'NEWS');
+  runs=[{...run,id:800002,conclusion:'failure',html_url:'https://github.com/wnalstlr777/AI-Studio/actions/runs/800002'}];await page.clock.fastForward(300001);await page.waitForFunction(selector=>document.querySelector(selector).dataset.state==='ALERT',stateSelector);await page.locator(kind==='web'?'#hina-message':'#bubble').click();assert.notEqual(await page.locator(stateSelector).getAttribute('data-state'),'ALERT');
+  await page.unroute('https://api.github.com/**');await page.route('https://api.github.com/**',r=>r.abort());await page.clock.fastForward(300001);await page.waitForFunction(selector=>document.querySelector(selector).dataset.state==='CONNECTION_ERROR',stateSelector);assert.ok((await image.getAttribute('src')).endsWith('hina-idle.gif'));results.push(kind+': real QA success->NEWS dedup, failure->ALERT acknowledgement, network error distinct');
+  if(kind==='web'){
+   assert.equal(await page.locator('.department-card').count(),8);await page.locator('.department-card').first().click();await page.locator('#department-issue-input').fill('공용 GIF 회귀 검수');await page.locator('#department-add-issue').click();assert.match(await page.locator('#department-issue-list').innerText(),/공용 GIF 회귀 검수/);await page.locator('#department-close').click();assert.equal(await page.locator('#department-window').isHidden(),true);
+   await page.screenshot({path:output+'/web-pc.png',fullPage:true});await page.setViewportSize({width:390,height:844});assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));await page.screenshot({path:output+'/web-mobile.png',fullPage:true});
+   const cards=await page.locator('.department-card').evaluateAll(nodes=>nodes.map(n=>({x:n.getBoundingClientRect().x,w:n.getBoundingClientRect().width,h:n.getBoundingClientRect().height})));assert.equal(cards[0].h,cards[1].h);assert.equal(cards[0].w,cards[1].w);assert.ok(await page.locator('#run-result').isVisible());results.push('PC/mobile layout and row/column alignment, departments/issues/QA preserved; no new emoji buttons');
+  }
+  // Loss of GIF and remote network must preserve original image, not invent QA failure.
+  await page.route('**/shared/hina/assets/hina-*.gif',r=>r.abort());await page.goto(base+url+'?hinaTest=1&offline=1');await page.waitForFunction(selector=>document.querySelector(selector).src.endsWith('/secretary.png'),kind==='web'?'#hina-character':'#character');await image.evaluate(img=>img.decode());assert.deepEqual(errors,[]);results.push(kind+': missing GIF/remote update -> original image fallback');
+  await context.close();
+ }
+ await writeFile(output+'/validation.json',JSON.stringify({scope:'Chromium DOM and original GIF decoder; desktop browser preview, not Windows EXE',results,geometry},null,2)+'\n');console.log('PASS shared GIFs:',results.length,'checks');
+}finally{await browser.close();await new Promise(r=>server.close(r));}

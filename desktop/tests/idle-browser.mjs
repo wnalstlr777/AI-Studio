@@ -23,7 +23,7 @@ try{
  const atomic=await page.evaluate(async()=>{
   const {RemoteAssets}=await import('./shared/hina/remote-assets.js');const {IDLE_MANIFEST_URL}=await import('./shared/hina/remote-assets-policy.js');const bundled=(await import('./shared/hina/bundled-manifest.js')).default;const originalFetch=globalThis.fetch.bind(globalThis),results=[];
   for(const variant of ['valid','frames','duration','state-alias']){
-   let commits=0,lastError='';const manifest=structuredClone(bundled);manifest.version='qa-'+variant;if(variant==='frames')manifest.motions.IDLE_NORMAL.frames++;if(variant==='duration')manifest.motions.IDLE_NORMAL.durationMs+=100;if(variant==='state-alias')manifest.motions.IDLE_NORMAL={...manifest.motions.IDLE_NORMAL,...manifest.assets.IDLE,animated:true};
+   let commits=0,lastError='';const manifest=structuredClone(bundled);manifest.version='qa-'+variant;if(variant==='frames')manifest.motions.IDLE_NORMAL.frames++;if(variant==='duration')manifest.motions.IDLE_NORMAL.durationMs+=100;if(variant==='state-alias')manifest.motions.IDLE_NORMAL={...manifest.motions.IDLE_NORMAL,...manifest.assets.WORK,animated:true};
    const store={getMeta:async()=>null,getBlob:async()=>null,commit:async()=>{commits++;}};
    const updater=new RemoteAssets({bundledManifest:bundled,manifestURL:IDLE_MANIFEST_URL,store,fetcher:(url,opts)=>url===IDLE_MANIFEST_URL?Promise.resolve(Response.json(manifest)):originalFetch(url,opts),onStatus:s=>{if(s.kind==='error')lastError=s.message;}});
    try{results.push({variant,activated:await updater.check(),commits,lastError});}finally{updater.stop();}

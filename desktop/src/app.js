@@ -1,5 +1,6 @@
+import { showAsset, FALLBACK_SRC } from './shared/hina/assets.js';
 import { bindPetInput } from './input.js';
-import { QAPoller, EventLedger, snapshot, classify, messages, runUrl } from './shared/hina/state.js';
+import { QAPoller, EventLedger, snapshot, classify, messages, runUrl, acceptNews } from './shared/hina/state.js';
 import { IdlePlayer, isIdleState } from './shared/hina/idle-player.js';
 import { MotionView } from './shared/hina/motion-view.js';
 import { IDLE_MANIFEST_URL } from './shared/hina/remote-assets-policy.js';
@@ -19,7 +20,8 @@ let prefs = { top:true,roam:true,notifications:true,size:200,...read('hina.setti
 prefs.size=Math.min(240,Math.max(140,Number(prefs.size)||200));
 let ledger = new EventLedger(read('hina.events',{}));
 let latest = { state:'IDLE',run:null }, state='IDLE', direction=1, alertRun=null, flashUntil=0, pausedUntil=0, connected=false, qaDeferred=false;
-let movementTimer, behaviorTimer, bubbleTimer, maskTimer, moving=false, interacting=false;
+let movementTimer, behaviorTimer, bubbleTimer, maskTimer, newsTimer, moving=false, interacting=false;
+let previewState=null, newsRun=null, newsSequence=0, shownNewsSequence=0;
 let maskBusy=false, maskDirty=false;
 let roaming='IDLE';
 let greetingTimer, greetingEndTimer, greetingActive=false, greetingSequence=0, activeGreetingSrc='';
@@ -66,7 +68,7 @@ function render(next,force=false) {
   const motion=isIdleState(next)&&!compareOriginal&&!greetingActive?idlePlayer.asset():null;
   const asset=compareOriginal?{...displayAsset('IDLE'),src:new URL('./shared/hina/assets/secretary.png',import.meta.url).href,localIdleStyle:false,label:'원본 비교'}:motion||displayAsset(next);
   const src=greetingActive&&next==='IDLE'?activeGreetingSrc:asset.src;
-  if(!motion){motionView.close();if($('#character').src!==src)$('#character').src=src;}
+  if(!motion){motionView.close();const restart=next==='NEWS'&&shownNewsSequence!==newsSequence;showAsset($('#character'),{...asset,src},()=>settingsError('에셋 표시 실패 · 원본 이미지 사용'),{restart,onReady:()=>{if(next==='NEWS'&&restart&&state==='NEWS')armNewsTimer();}});if(next==='NEWS')shownNewsSequence=newsSequence;}
   else {const key=`${motion.src}:${idlePlayer.sequence}`;if(motionView.key!==key)idlePlayer.loading();motionView.show({...motion,loop:idlePlayer.mode==='loop'||motion.loop},key);motionView.pause(idlePlayer.paused);}
   $('#asset-status').textContent=asset.label;
   document.body.dataset.state=state;document.body.dataset.idleMotion=motion?.id||'';
@@ -78,9 +80,10 @@ function render(next,force=false) {
 
 function baseState() { return latest.state==='WORK' && connected ? 'WORK' : roaming; }
 function settle() {
+  if(previewState){render(previewState);return;}
   if(alertRun) { render('ALERT'); return; }
   if(!connected){render(qaDeferred?roaming:'CONNECTION_ERROR');return;}
-  if(Date.now()<flashUntil) { render('SUCCESS'); return; }
+  if(Date.now()<flashUntil) { render('NEWS'); return; }
   render(baseState());
 }
 function startMovement() {
@@ -99,6 +102,10 @@ function behavior() {
   settle(); startMovement();
   behaviorTimer=setTimeout(behavior,15000+Math.random()*15000);
 }
+function finishNews(){flashUntil=0;if(previewState==='NEWS')previewState='IDLE';if(!alertRun){roaming='IDLE';settle();showBubble('');}}
+function armNewsTimer(duration=displayAsset('NEWS').durationMs||1600){clearTimeout(newsTimer);flashUntil=Date.now()+duration;newsTimer=setTimeout(finishNews,duration+30);}
+function startNews(run=null){newsSequence++;newsRun=run;armNewsTimer(17000);}
+
 function settingsError(e) { $('#settings-error').textContent=String(e); }
 async function updateMask() {
   if(!native)return;
@@ -136,8 +143,8 @@ bindPetInput($('#pet'), {
   onError:settingsError,
 });
 $('#bubble').onclick=async()=>{
-  const url=runUrl(alertRun||latest.run);if(url)try { await invoke('open_run',{url}); }catch(e){settingsError(e);}
-  alertRun=null;flashUntil=0;showBubble('');settle();
+  const url=runUrl(state==='NEWS'?newsRun:alertRun||latest.run);if(url)try { await invoke('open_run',{url}); }catch(e){settingsError(e);}
+  if(state==='NEWS')roaming='IDLE';alertRun=null;flashUntil=0;clearTimeout(newsTimer);showBubble('');settle();
 };
 function openSettings(){ $('#settings').hidden=false;pausedUntil=Date.now()+5000;updateMask(); }
 document.oncontextmenu=e=>{e.preventDefault();openSettings();};
@@ -169,6 +176,9 @@ for(const id of ['top','roam','notifications','size']) {
 }
 function applySize(){ $('#pet').style.width=prefs.size+'px';$('#pet').style.height=(prefs.size+56)+'px';$('#bubble').style.bottom=(prefs.size+66)+'px';updateMask(); }
 $('#autostart').onchange=async e=>{try {e.target.checked=await invoke('autostart',{enabled:e.target.checked});}catch(error){e.target.checked=!e.target.checked;settingsError(error);}};
+window.addEventListener('hina:news',e=>{if(acceptNews(ledger,e.detail)){localStorage.setItem('hina.events',JSON.stringify(ledger.save()));if(!alertRun){startNews();render('NEWS');showBubble(messages.NEWS);}}});
+if(new URLSearchParams(location.search).get('hinaTest')==='1')window.hinaPreviewState=next=>{if(!['IDLE','ALERT','NEWS',null].includes(next))return;clearTimeout(newsTimer);previewState=next;if(next)idlePlayer.reset();if(next==='NEWS')startNews();if(next){render(next,true);showBubble(messages[next]||'');}else{flashUntil=0;settle();}};
+
 const poller=new QAPoller({storage:localStorage,
   onCached(_runs,{retryAt}){qaDeferred=true;$('#qa-connection').textContent=`QA 저장된 결과 · ${new Date(retryAt).toLocaleTimeString()} 재조회 대기`;settle();},
   async onResult(runs){
@@ -176,10 +186,10 @@ const poller=new QAPoller({storage:localStorage,
     connected=true;qaDeferred=false;$('#qa-connection').textContent='QA 연결 정상 · '+new Date().toLocaleTimeString();latest=snapshot(runs);
     const event=fresh[0];
     if(event){
-      const next=classify(event);
+      const next=classify(event)==='SUCCESS'?'NEWS':classify(event);
       if(next==='ALERT')alertRun=event;
-      else if(!alertRun){flashUntil=Date.now()+5000;setTimeout(()=>{if(!alertRun){settle();showBubble('');}},5100);}
-      if(next==='ALERT'||!alertRun)showBubble(messages[next],next==='SUCCESS'?5000:0);
+      else if(!alertRun)startNews(event);
+      if(next==='ALERT'||!alertRun)showBubble(messages[next],0);
       const url=runUrl(event);
       if(prefs.notifications && url && (next==='ALERT'||!alertRun))try {await invoke('notify',{url,failure:next==='ALERT'});}catch(e){settingsError(e);}
     } else if(alertRun) showBubble(messages.ALERT);
@@ -187,10 +197,10 @@ const poller=new QAPoller({storage:localStorage,
     else if(Date.now()>=flashUntil) showBubble('');
     settle();
   },
-  onError(error){connected=false;qaDeferred=false;$('#qa-connection').textContent=`QA 연결: ${error.message} · ${new Date(error.retryAt||Date.now()+120000).toLocaleTimeString()} 재시도`;if(!alertRun){render('CONNECTION_ERROR');showBubble(messages.CONNECTION_ERROR+'\nQA 결과 미확인 · 자동 재시도');}}
+  onError(error){connected=false;qaDeferred=false;$('#qa-connection').textContent=`QA 연결: ${error.message} · ${new Date(error.retryAt||Date.now()+120000).toLocaleTimeString()} 재시도`;if(!alertRun&&Date.now()>=flashUntil){render('CONNECTION_ERROR');showBubble(messages.CONNECTION_ERROR+'\nQA 결과 미확인 · 자동 재시도');}}
 });
 async function init(){
-  applySize();render('IDLE');
+  $('#character').src=FALLBACK_SRC;applySize();render('IDLE');
   if(native){
     await native.event.listen('settings',openSettings);
     await win.setAlwaysOnTop(prefs.top);await invoke('move_pet',{dx:0,bottom:true});await updateMask();await win.show();
@@ -198,5 +208,5 @@ async function init(){
   } else settingsError('브라우저 미리보기: 이동·트레이·자동 실행·앱 알림은 Windows 앱에서 사용');
   behavior();scheduleGreeting();scheduleIdleMotion();poller.start();remoteAssets.start();
 }
-window.addEventListener('beforeunload',()=>{remoteAssets.stop();poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);clearTimeout(greetingTimer);clearTimeout(greetingEndTimer);clearInterval(idleMotionTimer);motionView.close();});
+window.addEventListener('beforeunload',()=>{remoteAssets.stop();poller.stop();clearInterval(movementTimer);clearInterval(maskTimer);clearTimeout(behaviorTimer);clearTimeout(bubbleTimer);clearTimeout(newsTimer);clearTimeout(greetingTimer);clearTimeout(greetingEndTimer);clearInterval(idleMotionTimer);motionView.close();});
 init().catch(e=>{settingsError(e);openSettings();win?.show();});

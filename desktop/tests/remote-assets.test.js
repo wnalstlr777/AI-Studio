@@ -13,6 +13,7 @@ const entry=(file,bytes,format='gif')=>({file,format,bytes:bytes.length,sha256:c
 // A valid GIF comment changes the fixture version, without changing any character pixels.
 const commented=label=>new Uint8Array([...gif.slice(0,-1),33,254,label.length,...Buffer.from(label),0,59]);
 const pack=(version,file='idle-v2.gif',bytes=gif)=>({...structuredClone(bundled),version,assets:{...structuredClone(bundled.assets),IDLE:entry(file,bytes)}});
+const bundledFiles=new Map(await Promise.all(Object.values(bundled.assets).map(async a=>[a.file,new Uint8Array(await readFile(new URL(a.file,root)))])));
 class MemoryStore{
   constructor(){this.meta=new Map();this.blobs=new Map();this.failCommit=false;}
   async getMeta(key){return this.meta.get(key);}
@@ -20,7 +21,7 @@ class MemoryStore{
   async commit(manifest,blobs,previous){if(this.failCommit)throw Error('disk full');for(const [k,b]of blobs)this.blobs.set(k,b);this.meta.set('current',structuredClone(manifest));this.meta.set('previous',structuredClone(previous));}
 }
 function harness({store=new MemoryStore()}={}){
-  const h={manifest:structuredClone(bundled),files:new Map([['secretary.png',png],['greeting.gif',gif],['walk.gif',walk],['idle-v2.gif',gif]]),calls:[],offline:false,badFile:null,store,status:[]};
+  const h={manifest:structuredClone(bundled),files:new Map([...bundledFiles,['secretary.png',png],['greeting.gif',gif],['walk.gif',walk],['idle-v2.gif',gif]]),calls:[],offline:false,badFile:null,store,status:[]};
   h.updater=new RemoteAssets({bundledManifest:bundled,store,decode:async()=>({}),onStatus:s=>h.status.push(s),fetcher:async(url,options)=>{
     h.calls.push(url);assert.equal(options.redirect,'error');assert.equal(options.credentials,'omit');
     if(url===MANIFEST_URL){if(h.offline)throw Error('offline');return Response.json(h.manifest);}

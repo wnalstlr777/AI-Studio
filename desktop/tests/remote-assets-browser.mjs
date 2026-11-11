@@ -49,7 +49,7 @@ export async function remoteAssetChecks(page,{onUpdatedInput,resetQA=()=>{},scop
   await corrupt(manifest.assets.IDLE.sha256);await page.reload();await ready('qa-v2','previous');cases.push('damaged active cache falls back to previous normal version');
   await corrupt(remote('qa-v2').assets.IDLE.sha256);await page.reload();
   await page.waitForFunction(version=>document.querySelector('#asset-update-status').dataset.source==='bundled'&&document.querySelector('#asset-update-status').dataset.version===version,bundled.version);
-  assert.ok((await page.locator('#character').getAttribute('src')).endsWith('/secretary.png'));cases.push('damaged previous cache falls back to bundled assets');
+  assert.ok((await page.locator('#character').getAttribute('src')).endsWith('/'+bundled.assets.IDLE.file));cases.push('damaged previous cache falls back to bundled assets');
   await mkdir('qa-results',{recursive:true});await writeFile('qa-results/'+resultFile,JSON.stringify({scope,status:'passed',cases},null,2));
   console.log(`PASS remote assets (${scope}): ${cases.length} update/cache/recovery checks`);
 }

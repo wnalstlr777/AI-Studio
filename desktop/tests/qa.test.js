@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classify, snapshot, EventLedger, QAPoller, runUrl } from '../../shared/hina/state.js';
+import { classify, snapshot, EventLedger, QAPoller, runUrl, acceptNews } from '../../shared/hina/state.js';
 const run=(id,conclusion='success',attempt=1)=>({id,run_attempt:attempt,status:'completed',conclusion,created_at:new Date(1700000000000+id*1000).toISOString(),html_url:`https://github.com/wnalstlr777/AI-Studio/actions/runs/${id}`});
 test('real workflow statuses: cancellation and unknown are not QA failure',()=>{
   for(const c of ['failure','timed_out','startup_failure','action_required'])assert.equal(classify(run(1,c)),'ALERT');
@@ -65,4 +65,8 @@ test('persisted ETag/cache and polling interval suppress restart, manual and sec
  const options={storage,now:()=>clock,onCached:()=>cached++,onResult:r=>results.push(r),onError:()=>assert.fail(),fetcher:async(_,o)=>{calls++;lastHeaders=o.headers;return calls===1?Response.json({workflow_runs:[run(1)]},{headers:{etag:'"persisted"'}}):new Response(null,{status:304});}};
  const a=new QAPoller(options);await a.start();a.stop();const b=new QAPoller(options),c=new QAPoller(options);
  try{await b.start();await c.start();await b.poll();assert.equal(calls,1);clock+=300000;await b.poll();await c.poll();assert.equal(calls,2);assert.equal(lastHeaders['If-None-Match'],'"persisted"');assert.equal(results.length,2);assert.equal(cached,2);}finally{b.stop();c.stop();}
+});
+
+test('external NEWS IDs deduplicate across saved ledgers without accepting missing IDs',()=>{
+ const ledger=new EventLedger();assert.equal(acceptNews(ledger,{}),false);assert.equal(acceptNews(ledger,{id:'result-1'}),true);assert.equal(acceptNews(ledger,{id:'result-1'}),false);assert.equal(acceptNews(new EventLedger(ledger.save()),{id:'result-1'}),false);assert.equal(acceptNews(ledger,{id:'result-2'}),true);
 });

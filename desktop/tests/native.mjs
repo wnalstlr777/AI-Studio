@@ -89,6 +89,14 @@ try{
   assert.equal(limitedCalls,1);await page.addInitScript(()=>{Math.random=()=>0;});await page.reload();await page.waitForFunction(()=>document.body.dataset.state==='CONNECTION_ERROR');assert.equal(limitedCalls,1);
   await page.evaluate(()=>{Math.random=()=>0;document.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true}));});await page.locator('#motion-random').click();await page.locator('#motion-canvas').waitFor({state:'visible'});await page.clock.fastForward(6100);await page.waitForFunction(()=>document.body.dataset.idleMotion==='IDLE_HAPPY');assert.equal(limitedCalls,1);
   report.results.push({case:'EXE contains all eight motions; 403 random review and restart cooldown',status:'passed'});
+  await page.goto(page.url().split('?')[0]+'?hinaTest=1');await page.waitForFunction(()=>typeof window.hinaPreviewState==='function'&&document.body.dataset.state==='CONNECTION_ERROR');
+  for(const state of ['IDLE','ALERT','NEWS']){
+    await page.evaluate(s=>window.hinaPreviewState(s),state);
+    await page.waitForFunction(s=>document.querySelector('#character').dataset.assetSrc?.endsWith('hina-'+s.toLowerCase()+'.gif'),state);
+    await page.locator('#character').evaluate(img=>img.decode());assert.equal(await page.locator('body').getAttribute('data-state'),state);
+    if(state!=='NEWS')await clickOffice('native shared GIF input '+state);
+  }
+  await page.clock.fastForward(1700);await page.waitForFunction(()=>document.body.dataset.state==='IDLE');report.results.push({case:'shared GIF IDLE/ALERT/NEWS display and NEWS return',status:'passed'});
   await page.screenshot({path:await mkdir('qa-results',{recursive:true}).then(()=> 'qa-results/windows-native.png')});
   await page.evaluate(()=>window.__TAURI__.core.invoke('quit')).catch(()=>{});
   for(let i=0;i<50&&exitCode===undefined;i++)await sleep(100);

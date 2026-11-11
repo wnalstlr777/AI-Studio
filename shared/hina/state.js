@@ -1,6 +1,6 @@
 export const REPOSITORY = 'wnalstlr777/AI-Studio';
 export const RUNS_API = `https://api.github.com/repos/${REPOSITORY}/actions/workflows/sea-qa.yml/runs?per_page=30&branch=main`;
-export const messages = { IDLE: '', WALK: '', REST: '', WORK: '검수 중이에요!', SUCCESS: '사장님! 검수 통과예요!', ALERT: '사장님! 문제가 생겼어요!', CONNECTION_ERROR: '상태를 확인할 수 없어요.' };
+export const messages = { NEWS: '사장님! 새로운 소식이 들어왔습니다!', IDLE: '', WALK: '', REST: '', WORK: '검수 중이에요!', SUCCESS: '사장님! 검수 통과예요!', ALERT: '사장님! 문제가 생겼어요!', CONNECTION_ERROR: '상태를 확인할 수 없어요.' };
 export function runKey(run) { return `${run.id}:${run.run_attempt || 1}:${run.conclusion || run.status}`; }
 export function runUrl(run) {
   const url = String(run?.html_url || '');
@@ -95,4 +95,10 @@ export class QAPoller {
       }
     }finally{clearTimeout(timeout);this.busy=false;this.save();this.schedule();}
   }
+}
+
+// Stable IDs are required for non-QA notifications; never treat network failure as news.
+export function acceptNews(ledger,detail){
+  if(!detail||typeof detail.id!=='string'||!detail.id.trim()||detail.id.length>128)return false;
+  const key='news:'+detail.id;if(ledger.seen.has(key))return false;ledger.seen.add(key);return true;
 }

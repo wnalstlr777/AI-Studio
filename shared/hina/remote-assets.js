@@ -1,5 +1,5 @@
 import { assetFor } from './assets.js';
-import { assetEntries,MANIFEST_URL,CHECK_INTERVAL,MAX_MANIFEST_BYTES,normalizeManifest,manifestKey,assetURL,mimeFor,verifyBytes } from './remote-assets-policy.js';
+import { olderDatedVersion,assetEntries,MANIFEST_URL,CHECK_INTERVAL,MAX_MANIFEST_BYTES,normalizeManifest,manifestKey,assetURL,mimeFor,verifyBytes } from './remote-assets-policy.js';
 
 const request=r=>new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error);});
 const completed=tx=>new Promise((resolve,reject)=>{tx.oncomplete=resolve;tx.onabort=()=>reject(tx.error||new Error('Asset cache transaction aborted'));tx.onerror=()=>reject(tx.error||new Error('Asset cache write failed'));});
@@ -56,7 +56,8 @@ export class RemoteAssets{
     this.bundleByHash=new Map(this.bundled?assetEntries(this.bundled).map(a=>[a.sha256,a]):[]);
   }
   getAsset(state){
-    const a=this.current?.assets[state];if(!a)return assetFor(state);
+    const key=state==='NEWS'?'SUCCESS':state==='CONNECTION_ERROR'?'IDLE':state;
+    const a=this.current?.assets[key];if(!a)return assetFor(state);
     const resource=this.resources.get(a.sha256);
     const src=resource?.url||(this.source==='bundled'?new URL('./assets/'+a.file,import.meta.url).href:null);
     if(!src)return assetFor(state);
@@ -131,7 +132,15 @@ export class RemoteAssets{
   async loadCached(){
     for(const key of ['current','previous'])try{
       const value=await this.store.getMeta(key);if(!value)continue;
-      const manifest=normalizeManifest(value);if(manifest.schemaVersion!==this.bundled?.schemaVersion)throw new Error('Cached schema mismatch');const pack=await this.prepare(manifest,false);
+      const manifest=normalizeManifest(value);if(olderDatedVersion(manifest.version,this.bundled?.version))continue;if(manifest.schemaVersion!==this.bundled?.schemaVersion)throw new Error('Cached schema mismatch');
+      // Older clients omit optional state timing. Restore trusted metadata for identical bytes.
+      for(const [state,entry]of Object.entries(manifest.assets)){
+        const local=this.bundled.assets[state];
+        if(!entry.frames&&local?.frames&&entry.sha256===local.sha256&&entry.bytes===local.bytes&&entry.format===local.format){
+          for(const key of ['frames','durationMs','loop','width','height','centerX','footY'])entry[key]=local[key];
+        }
+      }
+      const pack=await this.prepare(manifest,false);
       if(this.stopped){this.discard(pack);return;}
       this.activate(manifest,pack,key==='current'?'cache':'previous');return;
     }catch{} // A damaged current cache must not hide a valid previous/bundled pack.
@@ -146,6 +155,7 @@ export class RemoteAssets{
     try{
       const {bytes}=await this.bytes(this.manifestURL,MAX_MANIFEST_BYTES,'no-cache');
       const manifest=normalizeManifest(JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes)));
+      if(olderDatedVersion(manifest.version,this.bundled?.version)){this.status('unchanged');return false;}
       if(this.bundled&&manifest.schemaVersion!==this.bundled.schemaVersion)throw new Error('Remote schema mismatch');
       if(this.current?.version===manifest.version){
         if(manifestKey(this.current)!==manifestKey(manifest))throw new Error('Manifest content changed without a version bump');

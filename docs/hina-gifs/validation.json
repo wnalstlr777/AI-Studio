@@ -1,0 +1,368 @@
+{
+  "scope": "Chromium DOM and original GIF decoder; desktop browser preview, not Windows EXE",
+  "results": [
+    "24 decoded frames: canvas, body reference height, center/feet, transparent corners, no clipping",
+    "web: IDLE/ALERT/NEWS, fixed image box, one-shot return, persistent news dedupe",
+    "web: distinct NEWS restarts cached GIF decoder; duplicate does not replay",
+    "web: real QA success->NEWS dedup, failure->ALERT acknowledgement, network error distinct",
+    "PC/mobile layout and row/column alignment, departments/issues/QA preserved; no new emoji buttons",
+    "web: missing GIF/remote update -> original image fallback",
+    "desktop: IDLE/ALERT/NEWS, fixed image box, one-shot return, persistent news dedupe",
+    "desktop: distinct NEWS restarts cached GIF decoder; duplicate does not replay",
+    "desktop: real QA success->NEWS dedup, failure->ALERT acknowledgement, network error distinct",
+    "desktop: missing GIF/remote update -> original image fallback"
+  ],
+  "geometry": [
+    {
+      "name": "idle",
+      "frames": [
+        {
+          "index": 0,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            117,
+            131,
+            388,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 1,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            117,
+            143,
+            393,
+            610
+          ],
+          "footCenter": 255,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 2,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            116,
+            160,
+            435,
+            610
+          ],
+          "footCenter": 255,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 3,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            112,
+            161,
+            397,
+            610
+          ],
+          "footCenter": 255,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 4,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            116,
+            154,
+            396,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 5,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            116,
+            141,
+            395,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 6,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            117,
+            138,
+            391,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 7,
+          "width": 512,
+          "height": 614,
+          "durationMs": 220,
+          "bounds": [
+            117,
+            135,
+            389,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        }
+      ]
+    },
+    {
+      "name": "alert",
+      "frames": [
+        {
+          "index": 0,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            107,
+            131,
+            398,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 1,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            107,
+            131,
+            427,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 2,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            108,
+            131,
+            397,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 3,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            106,
+            131,
+            449,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 4,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            107,
+            132,
+            454,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 5,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            107,
+            132,
+            404,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 6,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            108,
+            132,
+            403,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 7,
+          "width": 512,
+          "height": 614,
+          "durationMs": 180,
+          "bounds": [
+            108,
+            132,
+            404,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        }
+      ]
+    },
+    {
+      "name": "news",
+      "frames": [
+        {
+          "index": 0,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            119,
+            131,
+            388,
+            610
+          ],
+          "footCenter": 256,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 1,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            120,
+            131,
+            415,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 2,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            120,
+            131,
+            433,
+            610
+          ],
+          "footCenter": 256,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 3,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            117,
+            131,
+            454,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 4,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            120,
+            133,
+            497,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 5,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            118,
+            135,
+            494,
+            610
+          ],
+          "footCenter": 255,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 6,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            121,
+            133,
+            488,
+            610
+          ],
+          "footCenter": 256,
+          "cornerAlpha": 0
+        },
+        {
+          "index": 7,
+          "width": 512,
+          "height": 614,
+          "durationMs": 200,
+          "bounds": [
+            120,
+            133,
+            390,
+            610
+          ],
+          "footCenter": 255.5,
+          "cornerAlpha": 0
+        }
+      ]
+    }
+  ]
+}

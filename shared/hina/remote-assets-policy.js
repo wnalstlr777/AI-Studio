@@ -30,7 +30,7 @@ export function normalizeManifest(value){
     const prior=hashes.get(a.sha256);
     if(prior?.frames&&a.frames&&['frames','durationMs','width','height'].some(key=>prior[key]!==a[key]))fail('Conflicting motion metadata');
     const entry={file:a.file,format:a.format,bytes:a.bytes,sha256:a.sha256,animated:a.animated,complete:a.complete};
-    if(motion){
+    if(motion||a.frames!==undefined){
       if(!a.animated||!Number.isSafeInteger(a.frames)||a.frames<2||a.frames>240||!Number.isSafeInteger(a.durationMs)||a.durationMs<200||a.durationMs>15000||typeof a.loop!=='boolean')fail('Invalid motion timing');
       if(a.width!==512||a.height!==614||a.footY!==610||a.centerX!==256)fail('Inconsistent motion alignment');
       Object.assign(entry,{frames:a.frames,durationMs:a.durationMs,loop:a.loop,width:a.width,height:a.height,footY:a.footY,centerX:a.centerX});
@@ -76,4 +76,9 @@ export async function verifyBytes(bytes,entry,contentType=''){
   const hash=Array.from(new Uint8Array(digest),x=>x.toString(16).padStart(2,'0')).join('');
   if(hash!==entry.sha256)fail('Asset SHA-256 mismatch');
   return {width,height};
+}
+
+export function olderDatedVersion(candidate,reference){
+ const date=v=>/^\d{4}\.\d{2}\.\d{2}(?:[.-]|$)/.test(v||'')?v.slice(0,10):null;
+ const a=date(candidate),b=date(reference);return !!(a&&b&&a<b);
 }

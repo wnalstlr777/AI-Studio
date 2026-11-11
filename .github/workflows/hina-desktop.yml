@@ -8,7 +8,7 @@ on:
         default: ''
         type: string
   push:
-    branches: [main, hina-desktop-v1, hina-input-qa-v1.0.1, hina-remote-assets-v1]
+    branches: [hina-shared-gifs-v1, main, hina-desktop-v1, hina-input-qa-v1.0.1, hina-remote-assets-v1]
     paths:
       - 'desktop/**'
       - 'shared/hina/**'
@@ -37,6 +37,7 @@ jobs:
       - run: npm test
       - run: npm run test:browser
       - run: npm run test:idle-browser
+      - run: npm run test:shared-gifs
       - run: npm run prepare:ui
       - name: Rust input lock and alpha mapping tests
         run: |

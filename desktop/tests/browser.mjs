@@ -47,7 +47,7 @@ try{
   await page.clock.install();await page.goto(`http://127.0.0.1:${server.address().port}/`);
   const state=async(name)=>page.waitForFunction(name=>document.body.dataset.state===name,name);
   await state('IDLE');await page.locator('#character').evaluate(img=>img.decode());
-  assert.ok((await page.locator('#character').getAttribute('src')).endsWith('/secretary.png'));
+  assert.ok((await page.locator('#character').getAttribute('src')).endsWith('/hina-idle.gif'));
   async function input(name){
     await state(name);const before=await page.evaluate(()=>window.__calls.filter(c=>c.name==='open_office').length);
     await page.locator('#pet').click();const box=await page.locator('#pet').boundingBox();

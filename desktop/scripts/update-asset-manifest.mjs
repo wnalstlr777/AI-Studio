@@ -13,3 +13,5 @@ for(const entry of assetEntries(manifest)){
 }
 manifest.version=version;const normalized=normalizeManifest(manifest);
 await writeFile(path,JSON.stringify(normalized,null,2)+'\n');console.log(`Updated manifest ${version}; review complete flags before publishing`);
+
+if(path.pathname.endsWith('/manifest.json'))await writeFile(new URL('../../shared/hina/bundled-web-manifest.js',import.meta.url),'// Generated from assets/manifest.json\nexport default '+JSON.stringify(normalized)+';\n');
