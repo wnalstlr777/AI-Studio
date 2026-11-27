@@ -14,7 +14,7 @@ let lastHealthy;
 const home = value => new URL(value === 'development' ? '?channel=development' : './', root).href;
 const short = value => value?.slice(0, 10) ?? '—';
 
-function command(type) {
+function command(type, manual = false) {
   const target = navigator.serviceWorker.controller || registration?.active;
   if (!target) return Promise.reject(new Error('Update worker unavailable'));
   return new Promise((resolve, reject) => {
@@ -37,7 +37,7 @@ function command(type) {
         finish(reject, new Error(data.message));
       }
     };
-    target.postMessage({ type, channel }, [port.port2]);
+    target.postMessage({ type, channel, manual }, [port.port2]);
   });
 }
 
@@ -53,6 +53,7 @@ function display(value) {
       id: 'ota-' + value.channel + '-' + value.pending.content,
     } }));
   }
+  field('history-empty').hidden = value.history.length > 0;
   field('history').replaceChildren(...value.history.map(item => {
     const row = document.createElement('li');
     const actions = { activation: '적용', rollback: '복원', recovery: '자동 복구' };
@@ -60,16 +61,17 @@ function display(value) {
     return row;
   }));
   status(value.pending ? '검증 완료 · 적용할 준비가 됐어요' :
-    value.signed ? '현재 채널 확인 완료' : '초기 설치본 사용 중 · OTA 서명 키 설정 대기');
+    !value.signed ? '초기 설치본 사용 중 · OTA 서명 키 설정 대기' :
+    value.retryAt ? '최근에 확인했어요 · 잠시 후 다시 확인할 수 있어요' : '현재 채널 확인 완료');
 }
 
-async function refresh(type = 'check') {
+async function refresh(manual = false) {
   if (busy || !registration) return;
   busy = true;
   field('channel').disabled = true;
   field('check').disabled = true;
   try {
-    display(await command(type));
+    display(await command('check', manual));
   } catch {
     status(lastHealthy?.pending ? '확인 실패 · 준비된 버전을 계속 사용할 수 있어요' :
       '업데이트 확인 실패 · 현재 버전을 유지합니다');
@@ -87,6 +89,7 @@ async function start() {
     await navigator.serviceWorker.register(new URL('sw.js', root), { scope: root.pathname, type: 'module' });
     registration = await navigator.serviceWorker.ready;
     field('channel').value = channel;
+    navigator.serviceWorker.addEventListener('controllerchange', () => refresh());
     refresh();
     setInterval(() => { if (!document.hidden) refresh(); }, 30 * 60 * 1000);
   } catch {
@@ -100,7 +103,7 @@ field('channel').addEventListener('change', event => {
   field('apply').hidden = field('rollback').hidden = field('briefing').hidden = true;
   refresh();
 });
-field('check').addEventListener('click', () => refresh());
+field('check').addEventListener('click', () => refresh(true));
 field('apply').addEventListener('click', () => location.assign(home(channel)));
 field('rollback').addEventListener('click', async () => {
   try {

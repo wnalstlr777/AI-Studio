@@ -18,6 +18,9 @@ const blobKey = hash => url('ota/blobs/' + hash);
 const releaseURL = (channel, sequence) => url(`${releaseMarker}${channel}/${sequence}/index.html`);
 const TYPES = { html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8',
   css: 'text/css; charset=utf-8', png: 'image/png', gif: 'image/gif', webp: 'image/webp' };
+// A new release validator must not inherit a cooldown from a worker that
+// could not recognize the expanded file manifest.
+const checkRevision = 2;
 const empty = () => ({ channels: {}, releases: {}, history: [] });
 let queue = Promise.resolve();
 let download;
@@ -141,9 +144,9 @@ function snapshot(state, channel) {
   };
 }
 
-async function check(channel, progress) {
+async function check(channel, progress, manual = false) {
   if (download) return download.then(async () => snapshot((await load())[1], channel));
-  download = downloadRelease(channel, progress);
+  download = downloadRelease(channel, progress, manual);
   try {
     return await download;
   } finally {
@@ -151,14 +154,17 @@ async function check(channel, progress) {
   }
 }
 
-async function downloadRelease(channel, progress) {
+async function downloadRelease(channel, progress, manual) {
   const initial = await exclusive(async () => {
     const [cache, state] = await load();
     const current = channelState(state, channel);
-    if (!trustedKeys[channel] || Date.now() - (current.checkedAt || 0) < 30 * 60 * 1000) {
-      return { value: snapshot(state, channel) };
+    if (!trustedKeys[channel]) return { value: snapshot(state, channel) };
+    const retryAt = (current.checkedAt || 0) + (manual ? 60 : 1800) * 1000;
+    if (current.checkRevision === checkRevision && Date.now() < retryAt) {
+      return { value: { ...snapshot(state, channel), retryAt } };
     }
     current.checkedAt = Date.now();
+    current.checkRevision = checkRevision;
     await save(cache, state);
     return { cache, known: state.releases[current.pending || current.active], highest: current.highest };
   });
@@ -275,7 +281,9 @@ async function publicData(feed, { validate, limit }) {
 }
 
 if (allowed) {
-  self.addEventListener('install', event => event.waitUntil(exclusive(bootstrap)));
+  self.addEventListener('install', event => event.waitUntil(
+    exclusive(bootstrap).then(() => self.skipWaiting())
+  ));
   self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
   self.addEventListener('fetch', event => {
     const address = new URL(event.request.url);
@@ -296,7 +304,7 @@ if (allowed) {
   });
 
   self.addEventListener('message', event => {
-    const { type, channel } = event.data || {};
+    const { type, channel, manual } = event.data || {};
     if (!event.source?.url?.startsWith(root.href) || !CHANNELS.includes(channel)) return;
     const reply = event.ports[0];
     if (!reply) return;
@@ -306,7 +314,7 @@ if (allowed) {
       const [, state] = await load();
       return snapshot(state, channel);
     };
-    const operation = type === 'check' ? check(channel, value => reply.postMessage(value)) : exclusive(run);
+    const operation = type === 'check' ? check(channel, value => reply.postMessage(value), manual === true) : exclusive(run);
     event.waitUntil(operation.then(value => reply.postMessage({ status: 'ready', value }),
       error => reply.postMessage({ status: 'error', message: error.message })));
   });
