@@ -7,6 +7,15 @@ const maximumCopper = 1_000_000_000_000;
 const positive = value => Number.isSafeInteger(value) && value > 0;
 const apiHost = 'https://kr.api.blizzard.com';
 
+export function auctionRows(document) {
+  if (!document || typeof document !== 'object' || Array.isArray(document) ||
+      (!('_links' in document) && !('auctions' in document))) {
+    throw new Error('Unrecognized Blizzard auction response');
+  }
+  // Blizzard omits the auction array on some empty responses.
+  return document.auctions ?? [];
+}
+
 export async function selectBusiestHouse(index, fetchHouse) {
   if (!Array.isArray(index?.auctions)) throw new Error('Unexpected Forever market index');
   const ids = [...new Set(index.auctions.filter(house => positive(house?.id) &&
@@ -20,11 +29,12 @@ export async function selectBusiestHouse(index, fetchHouse) {
         !listings.every(row => positive(row?.id)) || !commodities.every(row => positive(row?.id))) {
       throw new Error('Invalid auction listings for Horde house ' + id);
     }
-    const ids = new Set();
-    for (const category of [listings, commodities]) for (const row of category) ids.add(row.id);
-    console.log(`Horde house ${id}: ${ids.size} active listings`);
-    if (!busiest || ids.size > busiest.listingCount) {
-      busiest = { houseId: id, listingCount: ids.size, comparedHouses: 0, commodities, observedAt };
+    const auctions = new Map(listings.map(row => [row.id, row]));
+    for (const row of commodities) auctions.set(row.id, row);
+    console.log(`Horde house ${id}: ${auctions.size} active listings`);
+    if (!busiest || auctions.size > busiest.listingCount) {
+      busiest = { houseId: id, listingCount: auctions.size, auctions: [...auctions.values()], observedAt };
+
     }
   }
   if (!busiest.listingCount) throw new Error('No active Korean Horde listings returned');
@@ -33,13 +43,13 @@ export async function selectBusiestHouse(index, fetchHouse) {
 }
 
 function indexListings(rows) {
-  if (!Array.isArray(rows) || !rows.length) throw new Error('No commodity listings returned');
+  if (!Array.isArray(rows) || !rows.length) throw new Error('No auction listings returned');
   const byItem = new Map();
   for (const row of rows) {
     const id = row?.item?.id;
     const quantity = row?.quantity;
-    const price = row?.unit_price;
-    // The commodities endpoint supplies per-unit prices. Skip price variants.
+    const price = row?.unit_price ?? (positive(row?.buyout) && positive(quantity) ? Math.ceil(row.buyout / quantity) : 0);
+    // Commodity prices are per unit; round auction buyouts up per unit. Skip variants.
     if (!positive(id) || !positive(quantity) || quantity > 1_000_000 || !positive(price) ||
         price > maximumCopper || row.item.bonus_lists?.length) continue;
     const entries = byItem.get(id) ?? [];
@@ -47,7 +57,7 @@ function indexListings(rows) {
     byItem.set(id, entries);
   }
   for (const listings of byItem.values()) listings.sort((a, b) => a.price - b.price);
-  if (!byItem.size) throw new Error('Forever commodity price fields could not be read');
+  if (!byItem.size) throw new Error('Forever auction price fields could not be read');
   return byItem;
 }
 
@@ -180,14 +190,14 @@ async function refresh(destination, previousFile) {
   }
   const endpoint = '/data/wow/ruleset/1/auctions/';
   const index = await (await request(endpoint + 'index')).json();
-  const { houseId, listingCount, comparedHouses, commodities: auctions, observedAt } =
+  const { houseId, listingCount, comparedHouses, auctions, observedAt } =
     await selectBusiestHouse(index, async id => {
       const listings = await (await request(endpoint + id)).json();
       const response = await request(endpoint + id + '/commodities');
       const stamp = new Date(response.headers.get('last-modified') ?? Date.now());
       if (!Number.isFinite(stamp.getTime())) throw new Error('Invalid auction timestamp');
       const commodities = await response.json();
-      return { listings: listings.auctions, commodities: commodities.auctions, observedAt: stamp.toISOString() };
+      return { listings: auctionRows(listings), commodities: auctionRows(commodities), observedAt: stamp.toISOString() };
     });
   const recipes = await getRecipes(request);
   const { farm, craft, flips } = dailyMethods(auctions, recipes);
@@ -204,7 +214,8 @@ async function refresh(destination, previousFile) {
   const result = readMarket({ schemaVersion: 1, game: 'wow-forever', region: 'kr', faction: 'horde',
     status: 'ready', feeBps: 500, houseId, listingCount, comparedHouses, observedAt, picks, farm, craft, recipesChecked: recipes.length });
   await writeFile(destination, JSON.stringify(result) + '\n');
-  console.log(`Collected ${picks.length} listing-based candidates from KR Horde house ${houseId}`);
+  const report = `KR Horde #${houseId}: ${listingCount} active listings, ${comparedHouses} houses compared; ${farm.length} farming, ${craft.length} crafting, ${picks.length} resale candidates; observed ${observedAt}`;
+  console.log(process.env.GITHUB_ACTIONS ? '::notice::' + report : report);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {

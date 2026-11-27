@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { dailyMethods, rankListings, selectBusiestHouse } from '../scripts/refresh-wow-market.mjs';
+import { auctionRows, dailyMethods, rankListings, selectBusiestHouse } from '../scripts/refresh-wow-market.mjs';
 
 test('selects the busiest Horde house using unique auction IDs, or fails on incomplete coverage', async () => {
   const index = { auctions: [{ id: 99, name: 'Alliance Auction House' },
@@ -14,6 +14,8 @@ test('selects the busiest Horde house using unique auction IDs, or fails on inco
   assert.equal(result.houseId, 11);
   assert.equal(result.listingCount, 3);
   assert.equal(result.comparedHouses, 2);
+  assert.deepEqual(auctionRows({ _links: {} }), []);
+  assert.throws(() => auctionRows({ error: 'Unexpected response' }), /Unrecognized/);
   await assert.rejects(selectBusiestHouse(index, async () => ({ listings: [], commodities: null })), /Invalid auction/);
 });
 
