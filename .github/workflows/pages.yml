@@ -4,6 +4,7 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'mind/**'
       - 'shared/hina/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -28,9 +29,13 @@ jobs:
       - run: node desktop/scripts/validate-asset-manifest.mjs
       - run: node desktop/scripts/validate-asset-manifest.mjs idle-manifest.json
       - uses: actions/configure-pages@v5
+      - name: Stage committed site files
+        run: |
+          mkdir -p "$RUNNER_TEMP/pages"
+          git archive HEAD | tar -x -C "$RUNNER_TEMP/pages"
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: ${{ runner.temp }}/pages
       - id: deployment
         uses: actions/deploy-pages@v4
 

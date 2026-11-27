@@ -9,3 +9,6 @@ desktop/src-tauri/target/
 desktop/src-tauri/gen/
 
 desktop/qa-results/
+
+# Local CORE aggregates
+/.local/

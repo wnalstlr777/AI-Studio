@@ -12,6 +12,7 @@ on:
     paths:
       - 'desktop/**'
       - 'shared/hina/**'
+      - '!shared/hina/assets/**'
       - '.github/workflows/hina-desktop.yml'
 permissions:
   contents: read
