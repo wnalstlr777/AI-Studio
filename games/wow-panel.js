@@ -22,11 +22,11 @@ function renderPicks(id, choices, empty) {
     return;
   }
   const list = document.createElement('ol');
-  for (const [name, description] of choices.slice(0, 2)) {
+  for (const [rank, [name, description]] of choices.slice(0, 3).entries()) {
     const item = document.createElement('li');
     const title = document.createElement('strong');
     const details = document.createElement('small');
-    title.textContent = name;
+    title.textContent = `${rank + 1}위 · ${name}`;
     details.textContent = description;
     item.append(title, details);
     list.append(item);
@@ -55,7 +55,9 @@ async function showMarket() {
       farmItems[item.id] + ' 모아 팔기', `개당 수령액 약 ${gold(item.net)} · 현재 최저 등록가 기준`,
     ]), '시세가 확인된 파밍 재료가 없습니다.');
     renderPicks('wow-craft', (market.craft ?? []).map(item => [
-      item.name + ' 제작', `1회 ${item.quantity}개 · 재료비 ${gold(item.cost)} · 예상 차익 +${gold(item.profit)}`,
+      item.name, `1회 ${item.quantity}개 · 재료비 ${gold(item.cost)} · 예상 차익 +${gold(item.profit)}` +
+        (item.materials?.length ? ' · 재료 ' + item.materials.map(material => `${material.name} ×${material.quantity}`).join(', ') : '') +
+        (item.cooldown ? ' · 변환 재사용 대기 확인' : ''),
     ]), market.recipesChecked
       ? '확인한 제작법에서 차익 후보가 없습니다.' : '현재 제작법을 검증할 수 없습니다.');
     renderPicks('wow-market-results', market.picks.map(item => [

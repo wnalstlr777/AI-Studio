@@ -19,7 +19,10 @@ export function readMarket(value) {
       !limited(value.farm, item => integer(item?.id) && Object.hasOwn(farmItems, item.id) &&
         integer(item.buy) && Number.isSafeInteger(item.net) && item.net === Math.floor(item.buy * 0.95)) ||
       !limited(value.craft, item => label(item?.name) && integer(item.quantity) && integer(item.cost) &&
-        integer(item.receipt) && integer(item.profit) && item.profit === item.receipt - item.cost)) throw new Error('Invalid market summary');
+        integer(item.receipt) && integer(item.profit) && item.profit === item.receipt - item.cost &&
+        (item.cooldown === undefined || typeof item.cooldown === 'boolean') &&
+        (item.materials === undefined || (Array.isArray(item.materials) && item.materials.length <= 12 &&
+          item.materials.every(material => integer(material?.id) && integer(material.quantity) && label(material.name)))))) throw new Error('Invalid market summary');
   if (value.status === 'unconnected') {
     if (value.picks.length || value.farm?.length || value.craft?.length || value.observedAt !== null || value.houseId !== null) throw new Error('Invalid empty summary');
   } else if (!integer(value.houseId) || !Number.isFinite(Date.parse(value.observedAt)) ||

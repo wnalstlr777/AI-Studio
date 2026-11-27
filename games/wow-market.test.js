@@ -40,3 +40,16 @@ test('the daily briefing compares gathering, crafting and flipping separately', 
   assert.deepEqual(result.craft, [{ name: 'Mithril Bar', quantity: 1, cost: 300, receipt: 475, profit: 175 }]);
   assert.equal(result.flips[0].estimatedProfit, 470);
 });
+
+test('a conversion is ranked by one craft profit and carries reagent and cooldown details', () => {
+  const row = (id, unit_price) => ({ item: { id }, quantity: 5, unit_price });
+  const priced = [row(7082, 100), row(7078, 400), row(7078, 450), row(7078, 500)];
+  const result = dailyMethods(priced, [{
+    name: '바람 → 불', output: 7078, quantity: 1, cooldown: true,
+    materials: [{ id: 7082, quantity: 1, name: '바람의 정수' }],
+  }]);
+  assert.deepEqual(result.craft, [{
+    name: '바람 → 불', quantity: 1, cost: 100, receipt: 380, profit: 280, cooldown: true,
+    materials: [{ id: 7082, quantity: 1, name: '바람의 정수' }],
+  }]);
+});

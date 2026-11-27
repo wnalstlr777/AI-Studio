@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { readMarket, farmItems } from '../games/market-data.js';
+import { conversionModel, conversions } from '../games/wow-conversions.js';
 
 const hours = 60 * 60 * 1000;
 const maximumCopper = 1_000_000_000_000;
@@ -116,7 +117,10 @@ function rankCraft(byItem, recipes) {
     }
     const receipt = Math.floor(output[0].price * recipe.quantity * 0.95);
     const profit = receipt - cost;
-    return profit > 0 ? [{ name: recipe.name, quantity: recipe.quantity, cost, receipt, profit }] : [];
+    return profit > 0 ? [{ name: recipe.name, quantity: recipe.quantity, cost, receipt, profit,
+      ...(recipe.cooldown ? { cooldown: true } : {}),
+      ...(recipe.materials.every(material => material.name) ? { materials: recipe.materials } : {}),
+    }] : [];
   }).sort((a, b) => b.profit - a.profit).slice(0, 3);
 }
 
@@ -125,29 +129,34 @@ export function dailyMethods(rows, recipes) {
   return { farm: rankFarm(market), craft: rankCraft(market, recipes), flips: rankFlips(market) };
 }
 
-// Candidate IDs are only starting points. Every recipe must resolve in the
-// current Forever namespace with the expected output and deterministic yield.
-const recipeCandidates = [
-  [10097, 3860], [16153, 12359],
-  [17553, 13443], [17557, 13454], [17577, 13461], [24367, 20008],
-];
-
+// Check the current API wherever it exposes an unambiguous recipe. When the
+// endpoint omits a recipe, use the documented Forever game-data snapshot.
 async function getRecipes(request) {
   const recipes = [];
-  for (const [recipeId, output] of recipeCandidates) {
+  for (const candidate of conversions) {
+    if (!candidate.recipeId) {
+      recipes.push(candidate);
+      continue;
+    }
     try {
-      const recipe = await (await request('/data/wow/recipe/' + recipeId, 'static', 'ko_KR')).json();
+      const recipe = await (await request('/data/wow/recipe/' + candidate.recipeId, 'static', 'ko_KR')).json();
+      if (recipe.crafted_item?.id !== candidate.output || !recipe.reagents?.length) {
+        recipes.push(candidate);
+        continue;
+      }
       const amount = recipe.crafted_quantity;
       const quantity = amount?.value ?? (amount?.minimum === amount?.maximum ? amount?.minimum : null);
-      if (recipe.crafted_item?.id !== output || !positive(quantity) || quantity > 100 ||
-          typeof recipe.name !== 'string' || !recipe.name.trim() ||
-          !Array.isArray(recipe.reagents) || !recipe.reagents.length ||
+      if (!positive(quantity) || quantity > 100 ||
           !recipe.reagents.every(row => positive(row.reagent?.id) && positive(row.quantity) && row.quantity <= 100) ||
           new Set(recipe.reagents.map(row => row.reagent.id)).size !== recipe.reagents.length) continue;
-      recipes.push({ output, quantity, name: recipe.name.slice(0, 120),
-        materials: recipe.reagents.map(row => ({ id: row.reagent.id, quantity: row.quantity })) });
+      recipes.push({ ...candidate, quantity, materials: recipe.reagents.map(row => {
+        const id = row.reagent.id;
+        const name = typeof row.reagent.name === 'string' ? row.reagent.name :
+          candidate.materials.find(material => material.id === id)?.name ?? '아이템 #' + id;
+        return { id, quantity: row.quantity, name: name.slice(0, 120) };
+      }) });
     } catch {
-      // An unconfirmed recipe is excluded from recommendations.
+      recipes.push(candidate);
     }
   }
   return recipes;
@@ -170,7 +179,7 @@ async function refresh(destination, previousFile) {
   // Keep a recent published snapshot on unrelated site builds to avoid rereading the market.
   if (previousFile) {
     const previous = readMarket(JSON.parse(await readFile(previousFile, 'utf8')));
-    if (previous.status === 'ready' && previous.farm && previous.craft && previous.comparedHouses &&
+    if (previous.status === 'ready' && previous.farm && previous.craft && previous.craftModel === conversionModel && previous.comparedHouses &&
         Date.now() - Date.parse(previous.observedAt) < 20 * hours) {
       await writeFile(destination, JSON.stringify(previous) + '\n');
       return;
@@ -212,7 +221,7 @@ async function refresh(destination, previousFile) {
     return { ...item, name };
   }));
   const result = readMarket({ schemaVersion: 1, game: 'wow-forever', region: 'kr', faction: 'horde',
-    status: 'ready', feeBps: 500, houseId, listingCount, comparedHouses, observedAt, picks, farm, craft, recipesChecked: recipes.length });
+    status: 'ready', feeBps: 500, houseId, listingCount, comparedHouses, observedAt, picks, farm, craft, craftModel: conversionModel, recipesChecked: recipes.length });
   await writeFile(destination, JSON.stringify(result) + '\n');
   const report = `KR Horde #${houseId}: ${listingCount} active listings, ${comparedHouses} houses compared; ${farm.length} farming, ${craft.length} crafting, ${picks.length} resale candidates; observed ${observedAt}`;
   console.log(process.env.GITHUB_ACTIONS ? '::notice::' + report : report);
