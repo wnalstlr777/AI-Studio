@@ -53,6 +53,20 @@ jobs:
           WOW_FOREVER_HORDE_HOUSE_ID: ${{ vars.WOW_FOREVER_HORDE_HOUSE_ID }}
           HINA_OTA_DEV_REF: ${{ vars.HINA_OTA_DEV_REF }}
         run: bash scripts/stage-pages.sh "$RUNNER_TEMP/pages"
+      - name: Record WoW Forever collection status
+        run: |
+          node --input-type=module - "$RUNNER_TEMP/pages/games/wow-daily.json" <<'JS' >> "$GITHUB_STEP_SUMMARY"
+          import { readFileSync } from 'node:fs';
+          import { readMarket } from './games/market-data.js';
+          const market = readMarket(JSON.parse(readFileSync(process.argv[2], 'utf8')));
+          console.log('### WoW Forever: Korean Horde');
+          if (market.status === 'ready') {
+            console.log(`House ${market.houseId} · observed ${market.observedAt} · ${market.farm?.length ?? 0} farming, ${market.craft?.length ?? 0} crafting, ${market.picks.length} resale candidates`);
+          } else {
+            console.log('No verified market snapshot. See workflow annotations for collection errors.');
+            console.error('::warning::WoW Forever market snapshot is not connected.');
+          }
+          JS
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/pages

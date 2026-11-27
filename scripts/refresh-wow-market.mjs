@@ -189,5 +189,12 @@ async function refresh(destination, previousFile) {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await refresh(process.argv[2], process.argv[3]);
+  try {
+    await refresh(process.argv[2], process.argv[3]);
+  } catch (error) {
+    const notice = String(error?.message ?? 'Unknown market collection error')
+      .replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
+    console.error(process.env.GITHUB_ACTIONS ? '::warning::WoW Forever: ' + notice : notice);
+    process.exitCode = 1;
+  }
 }
