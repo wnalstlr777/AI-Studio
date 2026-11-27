@@ -1,11 +1,14 @@
 .game-panel { margin: 18px 0; }
-.game-panel h2 { margin: 0; }
-.game-panel h3 { margin: 0 0 8px; }
-.game-grid { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 18px; }
-.game-grid section { min-width: 0; }
-.game-grid ul, .game-grid ol { margin: 8px 0; padding-left: 21px; }
-.game-grid li { margin: 8px 0; }
+.game-panel h2, .game-panel h3, .wow-routes h4 { margin: 0; }
+.wow-routes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; padding: 0; list-style: none; }
+.wow-routes li { min-width: 0; border: 1px solid #2b4253; border-radius: 12px; padding: 12px; background: #172b3a; }
+.wow-routes p { font-size: 13px; line-height: 1.55; margin: 7px 0 0; }
+.wow-route-prices { margin-top: 8px; }
+.wow-route-prices:not([hidden]) { display: block; }
+.wow-resale { margin-top: 12px; }
+.wow-resale summary { cursor: pointer; }
+#wow-market-results li { margin: 8px 0; }
 #wow-market-results li > span { color: #9ae1bf; display: inline-block; margin-left: 8px; }
 #wow-market-results small { display: block; color: #8ea6b8; margin-top: 3px; }
-.game-sources { display: flex; flex-wrap: wrap; gap: 8px 14px; }
-@media (max-width: 660px) { .game-grid { grid-template-columns: 1fr; } }
+.game-sources { display: flex; flex-wrap: wrap; gap: 8px 14px; font-size: 13px; }
+@media (max-width: 700px) { .wow-routes { grid-template-columns: 1fr; } }

@@ -1,5 +1,5 @@
 import { appRoot } from '../ota/location.js';
-import { readMarket } from './market-data.js';
+import { readMarket, routeItems } from './market-data.js';
 
 const status = document.getElementById('wow-market-status');
 const results = document.getElementById('wow-market-results');
@@ -23,13 +23,24 @@ async function showMarket() {
     if (!response.ok) throw new Error('Market unavailable');
     const market = readMarket(await response.json());
     if (market.status === 'unconnected') {
-      status.textContent = '경매장 데이터 연결 대기 중 · 골드 팁은 아래에서 볼 수 있어요.';
+      status.textContent = '한국 호드 시세 미연결 · 루트만 표시 중';
       return;
     }
     const stale = Date.now() - Date.parse(market.observedAt) > 36 * 60 * 60 * 1000;
     const offline = response.headers.get('X-Hina-Offline') === '1';
     status.textContent = `한국 호드 #${market.houseId} · 관측 ${date.format(new Date(market.observedAt))} KST` +
       (offline || stale ? ' · 이전 시세 · 구매 전 게임에서 재확인' : '');
+    const quotes = new Map(market.routePrices?.map(item => [item.id, item.buy]));
+    for (const route of document.querySelectorAll('[data-wow-items]')) {
+      const prices = route.dataset.wowItems.split(',').map(Number)
+        .filter(id => quotes.has(id))
+        .map(id => routeItems[id] + ' ' + gold(quotes.get(id)));
+      if (prices.length) {
+        const line = route.querySelector('.wow-route-prices');
+        line.textContent = '개당 등록 최저가 · ' + prices.join(' / ');
+        line.hidden = false;
+      }
+    }
     if (!market.picks.length) {
       results.textContent = '현재 매물에서 기준을 충족한 후보가 없습니다.';
       return;

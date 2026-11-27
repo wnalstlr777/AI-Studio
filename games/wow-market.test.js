@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { pickHouse, rankListings } from '../scripts/refresh-wow-market.mjs';
+import { getRoutePrices, pickHouse, rankListings } from '../scripts/refresh-wow-market.mjs';
 
 test('only a verified Horde house is selected, and ambiguity requires an explicit ID', () => {
   const index = { auctions: [{ id: 99, name: 'Alliance Auction House' },
@@ -16,4 +16,10 @@ test('only thin low-price tiers with positive margin survive', () => {
   const rows = [item(1, 100, 2), item(2, 100, 22), item(3, 190, 2)];
   for (let n = 0; n < 8; n++) rows.push(item(1, 200, 6), item(2, 200, 6), item(3, 200, 6));
   assert.deepEqual(rankListings(rows), [{ id: 1, buy: 100, reference: 200, quantity: 2, estimatedProfit: 90 }]);
+});
+
+test('farm prices use the lowest valid quote per known material independently of resale picks', () => {
+  const listing = (id, unit_price) => ({ item: { id }, quantity: 2, unit_price });
+  assert.deepEqual(getRoutePrices([listing(2770, 800), listing(2770, 500), listing(785, 300),
+    listing(2450, -1), listing(123, 100)]), [{ id: 2770, buy: 500 }, { id: 785, buy: 300 }]);
 });

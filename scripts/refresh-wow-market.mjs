@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { readMarket } from '../games/market-data.js';
+import { readMarket, routeItems } from '../games/market-data.js';
 
 const hours = 60 * 60 * 1000;
 const maximumCopper = 1_000_000_000_000;
@@ -52,6 +52,19 @@ export function rankListings(rows) {
   return picks.sort((a, b) => b.estimatedProfit - a.estimatedProfit).slice(0, 10);
 }
 
+export function getRoutePrices(rows) {
+  const quotes = new Map();
+  for (const row of rows) {
+    const id = row?.item?.id;
+    const buy = row?.unit_price;
+    if (positive(id) && Object.hasOwn(routeItems, id) && positive(row.quantity) &&
+        positive(buy) && buy <= maximumCopper && !row.item.bonus_lists?.length) {
+      quotes.set(id, Math.min(buy, quotes.get(id) ?? buy));
+    }
+  }
+  return [...quotes].map(([id, buy]) => ({ id, buy }));
+}
+
 async function get(url, options = {}) {
   const response = await fetch(url, { ...options, signal: AbortSignal.timeout(30000), redirect: 'error' });
   if (!response.ok) throw new Error(`Blizzard HTTP ${response.status} at ${new URL(url).pathname}`);
@@ -69,7 +82,7 @@ async function refresh(destination, previousFile) {
   // Keep a recent published snapshot on unrelated site builds to avoid rereading the market.
   if (previousFile) {
     const previous = readMarket(JSON.parse(await readFile(previousFile, 'utf8')));
-    if (previous.status === 'ready' && Date.now() - Date.parse(previous.observedAt) < 20 * hours &&
+    if (previous.status === 'ready' && previous.routePrices && Date.now() - Date.parse(previous.observedAt) < 20 * hours &&
         (!process.env.WOW_FOREVER_HORDE_HOUSE_ID || String(previous.houseId) === process.env.WOW_FOREVER_HORDE_HOUSE_ID)) {
       await writeFile(destination, JSON.stringify(previous) + '\n');
       return;
@@ -105,7 +118,7 @@ async function refresh(destination, previousFile) {
     return { ...item, name };
   }));
   const result = readMarket({ schemaVersion: 1, game: 'wow-forever', region: 'kr', faction: 'horde',
-    status: 'ready', feeBps: 500, houseId, observedAt: stamp.toISOString(), picks });
+    status: 'ready', feeBps: 500, houseId, observedAt: stamp.toISOString(), picks, routePrices: getRoutePrices(auctions) });
   await writeFile(destination, JSON.stringify(result) + '\n');
   console.log(`Collected ${picks.length} listing-based candidates from KR Horde house ${houseId}`);
 }
