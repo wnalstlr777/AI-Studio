@@ -27,7 +27,14 @@ function renderPicks(id, choices, empty) {
     const title = document.createElement('strong');
     const details = document.createElement('small');
     title.textContent = `${rank + 1}위 · ${name}`;
-    details.textContent = description;
+    for (const [index, part] of description.split(' · ').entries()) {
+      if (index) details.append(' · ');
+      const span = document.createElement('span');
+      span.textContent = part;
+      if (part.startsWith('현재 판매가')) span.style.color = '#FFD166';
+      if (part.startsWith('예상 차익')) span.style.color = part.includes('−') ? '#FF7777' : '#65D98B';
+      details.append(span);
+    }
     item.append(title, details);
     list.append(item);
   }
@@ -55,14 +62,14 @@ async function showMarket() {
       farmItems[item.id] + ' 모아 팔기', `개당 수령액 약 ${gold(item.net)} · 현재 최저 등록가 기준`,
     ]), '시세가 확인된 파밍 재료가 없습니다.');
     renderPicks('wow-craft', (market.craft ?? []).map(item => [
-      item.name, `1회 ${item.quantity}개 · 재료비 ${gold(item.cost)} · 예상 차익 +${gold(item.profit)}` +
+      item.name, `1회 ${item.quantity}개 · 현재 판매가 ${gold(item.sale ?? Math.ceil(item.receipt / 0.95))} · 재료비 ${gold(item.cost)} · 예상 차익 +${gold(item.profit)}` +
         (item.materials?.length ? ' · 재료 ' + item.materials.map(material => `${material.name} ×${material.quantity}`).join(', ') : '') +
         (item.cooldown ? ' · 변환 재사용 대기 확인' : ''),
     ]), market.recipesChecked
       ? '확인한 제작법에서 차익 후보가 없습니다.' : '현재 제작법을 검증할 수 없습니다.');
     renderPicks('wow-market-results', market.picks.map(item => [
       item.name + ' 사서 되팔기',
-      `개당 매입 ${gold(item.buy)} · 예상 차익 +${gold(item.estimatedProfit)} · 최저가 ${item.quantity}개`,
+      `개당 매입 ${gold(item.buy)} · 현재 판매가 ${gold(item.reference)} · 예상 차익 +${gold(item.estimatedProfit)} · 최저가 ${item.quantity}개`,
     ]), '재판매 기준을 충족한 매물이 없습니다.');
   } catch {
     status.textContent = '경매장 시세를 불러오지 못했어요.';
