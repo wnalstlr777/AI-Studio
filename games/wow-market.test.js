@@ -1,14 +1,20 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { dailyMethods, pickHouse, rankListings } from '../scripts/refresh-wow-market.mjs';
+import { dailyMethods, rankListings, selectBusiestHouse } from '../scripts/refresh-wow-market.mjs';
 
-test('only a verified Horde house is selected, and ambiguity requires an explicit ID', () => {
+test('selects the busiest Horde house using unique auction IDs, or fails on incomplete coverage', async () => {
   const index = { auctions: [{ id: 99, name: 'Alliance Auction House' },
     { id: 10, name: 'Horde Auction House' }, { id: 11, name: '호드 경매장' }] };
-  assert.throws(() => pickHouse(index), /10, 11/);
-  assert.throws(() => pickHouse(index, '99'), /verified/);
-  assert.equal(pickHouse(index, '11'), 11);
-  assert.equal(pickHouse({ auctions: index.auctions.slice(0, 2) }), 10);
+  const called = [];
+  const result = await selectBusiestHouse(index, async id => {
+    called.push(id);
+    return { listings: [{ id: 1 }], commodities: id === 10 ? [{ id: 1 }, { id: 2 }] : [{ id: 2 }, { id: 3 }] };
+  });
+  assert.deepEqual(called, [10, 11]);
+  assert.equal(result.houseId, 11);
+  assert.equal(result.listingCount, 3);
+  assert.equal(result.comparedHouses, 2);
+  await assert.rejects(selectBusiestHouse(index, async () => ({ listings: [], commodities: null })), /Invalid auction/);
 });
 
 test('only thin low-price tiers with positive margin survive', () => {

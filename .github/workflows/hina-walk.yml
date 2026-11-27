@@ -45,7 +45,6 @@ jobs:
           HINA_OTA_DEVELOPMENT_KEY: ${{ secrets.HINA_OTA_DEVELOPMENT_KEY }}
           WOW_BLIZZARD_CLIENT_ID: ${{ secrets.WOW_BLIZZARD_CLIENT_ID }}
           WOW_BLIZZARD_CLIENT_SECRET: ${{ secrets.WOW_BLIZZARD_CLIENT_SECRET }}
-          WOW_FOREVER_HORDE_HOUSE_ID: ${{ vars.WOW_FOREVER_HORDE_HOUSE_ID }}
           HINA_OTA_DEV_REF: ${{ vars.HINA_OTA_DEV_REF }}
         run: bash scripts/stage-pages.sh "$RUNNER_TEMP/pages"
       - uses: actions/upload-pages-artifact@v3

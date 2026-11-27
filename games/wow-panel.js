@@ -47,7 +47,9 @@ async function showMarket() {
     }
     const stale = Date.now() - Date.parse(market.observedAt) > 36 * 60 * 60 * 1000;
     const offline = response.headers.get('X-Hina-Offline') === '1';
-    status.textContent = `한국 호드 #${market.houseId} · 관측 ${date.format(new Date(market.observedAt))} KST` +
+    const selection = market.comparedHouses
+      ? ` · ${market.comparedHouses}곳 중 최다 · 매물 ${market.listingCount.toLocaleString('ko-KR')}건` : '';
+    status.textContent = `한국 호드 #${market.houseId}${selection} · 관측 ${date.format(new Date(market.observedAt))} KST` +
       (offline || stale ? ' · 이전 시세 · 구매 전 게임에서 재확인' : '');
     renderPicks('wow-farm', (market.farm ?? []).map(item => [
       farmItems[item.id] + ' 모아 팔기', `개당 수령액 약 ${gold(item.net)} · 현재 최저 등록가 기준`,

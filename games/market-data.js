@@ -13,6 +13,7 @@ export function readMarket(value) {
       value.game !== 'wow-forever' || value.feeBps !== 500 ||
       !['unconnected', 'ready'].includes(value.status) || !Array.isArray(value.picks) ||
       value.picks.length > 10 ||
+      (value.comparedHouses !== undefined && (!integer(value.comparedHouses) || !integer(value.listingCount))) ||
       (value.recipesChecked !== undefined && (!Number.isSafeInteger(value.recipesChecked) ||
         value.recipesChecked < 0 || (value.craft?.length ?? 0) > value.recipesChecked)) ||
       !limited(value.farm, item => integer(item?.id) && Object.hasOwn(farmItems, item.id) &&
