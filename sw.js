@@ -1,6 +1,7 @@
 import { CHANNELS, MAX_MANIFEST, PROTOCOL, sha256, validateRelease, verifyEnvelope } from './ota/protocol.js';
 import { releaseMarker } from './ota/location.js';
 import { trustedKeys } from './ota/trust.js';
+import { readMarket } from './games/market-data.js';
 import { readPublicSummary } from './mind/public-summary.js';
 
 const root = new URL(self.registration.scope);
@@ -9,7 +10,10 @@ const allowed = local || (root.origin === 'https://wnalstlr777.github.io' && roo
 const url = path => new URL(path, root).href;
 const storeName = 'hina-ota-v1:' + root.pathname;
 const metaKey = url('ota/_local/state');
-const feed = url('mind/survival-summary.json');
+const feeds = new Map([
+  [url('mind/survival-summary.json'), { validate: readPublicSummary, limit: 4096 }],
+  [url('games/wow-daily.json'), { validate: readMarket, limit: 16384 }],
+]);
 const blobKey = hash => url('ota/blobs/' + hash);
 const releaseURL = (channel, sequence) => url(`${releaseMarker}${channel}/${sequence}/index.html`);
 const TYPES = { html: 'text/html; charset=utf-8', js: 'text/javascript; charset=utf-8',
@@ -254,10 +258,10 @@ async function cachedFile(request, channel, sequence, path) {
   } });
 }
 
-async function publicData() {
+async function publicData(feed, { validate, limit }) {
   const cache = await caches.open(storeName);
   try {
-    const value = readPublicSummary(await json(feed, 4096));
+    const value = validate(await json(feed, limit));
     const response = Response.json(value);
     await cache.put(feed, response.clone());
     return response;
@@ -278,8 +282,8 @@ if (allowed) {
     if (event.request.method !== 'GET' || address.origin !== root.origin ||
         !address.pathname.startsWith(root.pathname)) return;
     const path = address.pathname.slice(root.pathname.length);
-    if (address.href === feed) {
-      event.respondWith(publicData());
+    if (feeds.has(address.href)) {
+      event.respondWith(publicData(address.href, feeds.get(address.href)));
     } else if (path.startsWith(releaseMarker)) {
       const [, channel, sequence, ...parts] = path.split('/');
       if (CHANNELS.includes(channel) && /^\d+$/.test(sequence)) {

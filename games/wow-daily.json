@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "game": "wow-forever",
+  "region": "kr",
+  "faction": "horde",
+  "status": "unconnected",
+  "feeBps": 500,
+  "houseId": null,
+  "observedAt": null,
+  "picks": []
+}

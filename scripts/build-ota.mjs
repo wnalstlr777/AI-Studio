@@ -27,6 +27,7 @@ if (!bundleAssets.every(file => typeof file === 'string' && /^[a-z0-9-]+\.(?:gif
 }
 const paths = [
   'index.html', 'pwa/icon-192.png', 'pwa/icon-512.png', 'ota/ui.js', 'ota/ui.css', 'ota/location.js',
+  'games/wow-panel.js', 'games/wow-panel.css', 'games/market-data.js',
   'mind/mind.js', 'mind/mind.css', 'mind/domains.js', 'mind/public-summary.js',
   ...['assets', 'bundled-web-manifest', 'dashboard', 'remote-assets', 'remote-assets-policy', 'state']
     .map(name => 'shared/hina/' + name + '.js'),

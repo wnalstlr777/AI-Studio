@@ -10,10 +10,15 @@ on:
       - 'ota/**'
       - 'scripts/build-ota.mjs'
       - 'mind/**'
+      - 'games/**'
+      - 'scripts/refresh-wow-market.mjs'
+      - 'scripts/stage-wow-market.sh'
       - 'scripts/validate-mind-summary.mjs'
       - 'scripts/stage-pages.sh'
       - 'shared/hina/**'
       - '.github/workflows/pages.yml'
+  schedule:
+    - cron: '23 21 * * *' # 06:23 KST
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,7 +40,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test ota/protocol.test.js mind/mind.test.js
+      - run: node --test ota/protocol.test.js mind/mind.test.js games/wow-market.test.js
       - run: node desktop/scripts/validate-asset-manifest.mjs
       - run: node desktop/scripts/validate-asset-manifest.mjs idle-manifest.json
       - uses: actions/configure-pages@v5
@@ -43,6 +48,9 @@ jobs:
         env:
           HINA_OTA_STABLE_KEY: ${{ secrets.HINA_OTA_STABLE_KEY }}
           HINA_OTA_DEVELOPMENT_KEY: ${{ secrets.HINA_OTA_DEVELOPMENT_KEY }}
+          WOW_BLIZZARD_CLIENT_ID: ${{ secrets.WOW_BLIZZARD_CLIENT_ID }}
+          WOW_BLIZZARD_CLIENT_SECRET: ${{ secrets.WOW_BLIZZARD_CLIENT_SECRET }}
+          WOW_FOREVER_HORDE_HOUSE_ID: ${{ vars.WOW_FOREVER_HORDE_HOUSE_ID }}
           HINA_OTA_DEV_REF: ${{ vars.HINA_OTA_DEV_REF }}
         run: bash scripts/stage-pages.sh "$RUNNER_TEMP/pages"
       - uses: actions/upload-pages-artifact@v3

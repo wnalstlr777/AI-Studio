@@ -42,3 +42,13 @@ Windows 비서의 캐릭터 클릭은 기본 브라우저에서 이 Pages 주소
 
 PC와 모바일의 공용 웹 기능은 [OTA 배포·서명 절차](docs/hina-ota.md)를 따릅니다.
 Pages 설치본을 로컬에서 확인하려면 커밋한 소스로 `bash scripts/stage-pages.sh /tmp/hina-web-preview`를 실행한 후 그 디렉터리를 HTTP로 서비스합니다.
+
+## 지금 하는 게임 · 와우 포에버
+
+공개 대시보드는 한국 호드 경매장 재판매 후보와 골드 팁을 표시합니다. 시세는 GitHub Actions에서 매일 오전 6시 23분(KST)에 새로 수집하도록 예약되어 있습니다. 실제 시작 시각은 GitHub 스케줄러 상황에 따라 달라질 수 있습니다.
+
+- `github-pages` 환경 시크릿에 Battle.net 애플리케이션의 `WOW_BLIZZARD_CLIENT_ID`와 `WOW_BLIZZARD_CLIENT_SECRET`을 설정합니다. 공개 배포 파일에는 수치 요약만 포함합니다.
+- 한국 API의 호드 경매장이 여러 개면, 의도한 경매장을 확인한 뒤 환경 변수 `WOW_FOREVER_HORDE_HOUSE_ID`를 설정합니다. 얼라이언스 경매장이 지정되거나 일치하지 않으면 수집을 중단합니다.
+- 후보는 여러 매물이 등록된 거래 재료 중 최저가 물량이 적고 수수료 5%를 뺀 개당 예상 차익이 매입가의 15% 이상인 항목입니다. 기준가는 등록가의 수량 가중 중앙값이며 체결가는 포함되지 않습니다. 수집 실패 시 새 시세를 만들지 않습니다.
+
+[Forever API 경로 참고](https://us.forums.blizzard.com/en/blizzard/t/wow-forever-api-what-works-so-far-plus-a-ts-client/60334) · [시세·제작 자료](https://thott.bot/)

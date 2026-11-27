@@ -3,7 +3,7 @@ export const CHANNELS = ['stable', 'development'];
 export const MAX_FILE = 8 * 1024 * 1024;
 export const MAX_MANIFEST = 128 * 1024;
 export const HASH = /^[a-f0-9]{64}$/;
-const filePath = /^(?:index\.html|pwa\/[^/]+\.png|(?:ota|mind)\/[a-z0-9-]+\.(?:js|css)|shared\/hina\/(?:[a-z0-9-]+\.js|assets\/[a-z0-9-]+\.(?:gif|png|webp)))$/;
+const filePath = /^(?:index\.html|pwa\/[^/]+\.png|(?:ota|mind|games)\/[a-z0-9-]+\.(?:js|css)|shared\/hina\/(?:[a-z0-9-]+\.js|assets\/[a-z0-9-]+\.(?:gif|png|webp)))$/;
 export const requiredFiles = [
   'index.html', 'ota/ui.js', 'ota/ui.css', 'ota/location.js',
   'mind/mind.js', 'mind/mind.css', 'mind/domains.js', 'mind/public-summary.js',
