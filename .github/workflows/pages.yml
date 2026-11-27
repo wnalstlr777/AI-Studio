@@ -4,6 +4,11 @@ on:
     branches: [main]
     paths:
       - 'index.html'
+      - 'app.webmanifest'
+      - 'sw.js'
+      - 'pwa/**'
+      - 'ota/**'
+      - 'scripts/build-ota.mjs'
       - 'mind/**'
       - 'scripts/validate-mind-summary.mjs'
       - 'scripts/stage-pages.sh'
@@ -25,13 +30,20 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --test ota/protocol.test.js mind/mind.test.js
       - run: node desktop/scripts/validate-asset-manifest.mjs
       - run: node desktop/scripts/validate-asset-manifest.mjs idle-manifest.json
       - uses: actions/configure-pages@v5
       - name: Stage committed site files
+        env:
+          HINA_OTA_STABLE_KEY: ${{ secrets.HINA_OTA_STABLE_KEY }}
+          HINA_OTA_DEVELOPMENT_KEY: ${{ secrets.HINA_OTA_DEVELOPMENT_KEY }}
+          HINA_OTA_DEV_REF: ${{ vars.HINA_OTA_DEV_REF }}
         run: bash scripts/stage-pages.sh "$RUNNER_TEMP/pages"
       - uses: actions/upload-pages-artifact@v3
         with:

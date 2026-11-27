@@ -6,8 +6,27 @@ if [[ -e "$destination" ]]; then
   printf 'Pages staging directory must be new: %s\n' "$destination" >&2
   exit 1
 fi
+
+web_paths=(
+  index.html app.webmanifest sw.js pwa/icon-192.png pwa/icon-512.png
+  ota/release-note.txt ota/location.js ota/protocol.js ota/trust.js ota/ui.css ota/ui.js
+  shared/hina mind/mind.css mind/mind.js mind/domains.js mind/public-summary.js
+)
 mkdir -p "$destination"
-git archive HEAD -- index.html shared/hina docs/hina-gifs \
-  mind/mind.css mind/mind.js mind/domains.js mind/public-summary.js mind/survival-summary.json |
+git archive HEAD -- "${web_paths[@]}" docs/hina-gifs mind/survival-summary.json |
   tar -x -C "$destination"
+if [[ -n "$(find "$destination" -type l -print -quit)" ]]; then
+  printf 'Pages staging cannot contain symbolic links\n' >&2
+  exit 1
+fi
 node scripts/validate-mind-summary.mjs "$destination/mind/survival-summary.json"
+node scripts/build-ota.mjs "$destination"
+
+if [[ -n "${HINA_OTA_DEV_REF:-}" ]]; then
+  ref="refs/remotes/origin/$HINA_OTA_DEV_REF"
+  git check-ref-format "$ref"
+  preview=$(mktemp -d)
+  trap 'rm -rf -- "$preview"' EXIT
+  git archive "$ref" -- "${web_paths[@]}" | tar -x -C "$preview"
+  node scripts/build-ota.mjs "$destination" "$preview" development
+fi

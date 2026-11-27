@@ -1,0 +1,9 @@
+.hina-ota { margin: 16px 0 20px; }
+.hina-ota summary { cursor: pointer; font-weight: 700; }
+.hina-ota summary + div { margin-top: 12px; }
+.ota-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ota-controls select { color: inherit; background: #182c3d; padding: 5px; border: 1px solid #385267; border-radius: 7px; }
+.hina-ota progress { width: min(100%, 280px); accent-color: #74dec6; }
+.hina-ota p { margin: 8px 0; overflow-wrap: anywhere; }
+#ota-briefing { color: #aaf3e5; }
+.hina-ota [hidden] { display: none; }

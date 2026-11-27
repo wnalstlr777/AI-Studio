@@ -37,3 +37,8 @@ git diff -- mind/survival-summary.json
 영역은 `mind/domains.js`에 정의합니다. 실제 데이터가 연결되면 바깥 원에 경험, 안쪽 원에 검증된 능력을 표시합니다. 생존 경험은 100만 에피소드까지 고정 로그 눈금, 정책 평가는 10일까지 고정 선형 눈금을 사용합니다. 상한을 넘으면 원호가 포화되어도 실제 값은 계속 표시됩니다.
 
 Windows 비서의 캐릭터 클릭은 기본 브라우저에서 이 Pages 주소를 엽니다. 데스크톱 창의 화면은 설치본에 포함됩니다. 에셋과 웹 화면의 갱신에는 기존 원격 애니메이션 경로와 Pages를 사용합니다.
+
+## HINA OTA 및 PWA
+
+PC와 모바일의 공용 웹 기능은 [OTA 배포·서명 절차](docs/hina-ota.md)를 따릅니다.
+Pages 설치본을 로컬에서 확인하려면 커밋한 소스로 `bash scripts/stage-pages.sh /tmp/hina-web-preview`를 실행한 후 그 디렉터리를 HTTP로 서비스합니다.

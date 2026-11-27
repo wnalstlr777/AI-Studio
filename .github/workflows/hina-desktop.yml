@@ -10,9 +10,10 @@ on:
   push:
     branches: [hina-shared-gifs-v1, main, hina-desktop-v1, hina-input-qa-v1.0.1, hina-remote-assets-v1]
     paths:
-      - 'desktop/**'
-      - 'shared/hina/**'
-      - '!shared/hina/assets/**'
+      - 'desktop/src-tauri/**'
+      - 'desktop/package.json'
+      - 'desktop/package-lock.json'
+      - 'desktop/scripts/build.mjs'
 permissions:
   contents: read
   actions: read

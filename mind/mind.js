@@ -1,10 +1,11 @@
+import { appRoot } from '../ota/location.js';
 import { domains, ringFractions } from './domains.js';
 import { readPublicSummary } from './public-summary.js';
 
 const section = document.querySelector('.mind');
 const element = id => document.getElementById('mind-' + id);
-const localEndpoint = new URL('../.local/hina-mind.json', import.meta.url);
-const publicEndpoint = new URL('./survival-summary.json', import.meta.url);
+const localEndpoint = new URL('.local/hina-mind.json', appRoot(import.meta.url));
+const publicEndpoint = new URL('mind/survival-summary.json', appRoot(import.meta.url));
 const local = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const number = new Intl.NumberFormat('ko-KR');
 const days = new Intl.NumberFormat('ko-KR', { maximumFractionDigits: 3 });
@@ -160,18 +161,21 @@ async function refresh() {
   checking = true;
   try {
     if (local) {
-      const response = await request(localEndpoint);
-      if (response.ok) {
+      const response = await request(localEndpoint).catch(() => null);
+      if (response?.ok) {
         applySummary(readSnapshot(await response.json()), 'local');
         return;
       }
-      if (response.status !== 404 || (previous && previous.source !== 'public-survival')) {
+      if ((response && response.status !== 404) || (previous && previous.source !== 'public-survival')) {
         throw new Error('Local CORE snapshot unavailable');
       }
     }
     const response = await request(publicEndpoint);
     if (!response.ok) throw new Error('Public CORE summary unavailable');
     applySummary(readPublicSummary(await response.json()), 'public');
+    if (response.headers.get('X-Hina-Offline') === '1') {
+      element('connection').textContent += ' · 오프라인 캐시';
+    }
   } catch {
     element('connection').textContent = previous
       ? 'CORE 연결 끊김 · 마지막 확인 기록 표시'
