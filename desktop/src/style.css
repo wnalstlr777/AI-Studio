@@ -20,3 +20,6 @@ body.motion-guides #pet::before{content:"";position:absolute;pointer-events:none
 #inspection-bar button{background:#254357;border:1px solid #5b7b92;border-radius:5px;padding:7px}
 body.motion-inspect #pet{width:280px!important;height:366px!important}
 body.motion-inspect #bubble{display:none}
+
+/* Keep diagnostics available internally without displaying them below Hina. */
+#asset-status{display:none}
