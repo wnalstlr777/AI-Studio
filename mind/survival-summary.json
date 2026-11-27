@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "environment": "core-survival-simulator",
+  "savedDay": "2026-11-05",
+  "survival": {
+    "episodes": 809,
+    "policyUpdates": 136149,
+    "evaluation": {
+      "episodesTrained": 809,
+      "runs": 30,
+      "meanDays": 2.8472222222222223,
+      "timeLimitRuns": 0
+    }
+  }
+}

@@ -15,10 +15,11 @@
     <p id="mind-connection" class="muted" role="status">CORE 연결 확인 중</p>
   </div>
   <div class="mind-layout">
-    <div class="secretary" id="hina-secretary" data-state="IDLE" role="status" aria-live="polite"><div class="mind-orbit" aria-hidden="true"><div id="mind-experience-ring" class="mind-ring"></div><div id="mind-evaluation-ring" class="mind-ring"></div><div class="secretary-figure"><img id="hina-character" alt="히나 비서"></div></div><div class="secretary-message"><strong>히나 비서</strong><div id="hina-message" hidden></div><small id="hina-status">QA 조회 전 · 에이전트 미연결</small><small id="hina-asset">전용 애니메이션 미제작</small></div></div>
+    <div class="secretary" id="hina-secretary" data-state="IDLE" role="status" aria-live="polite"><div class="mind-orbit" aria-hidden="true"><svg id="mind-chart" viewBox="0 0 320 320" focusable="false"></svg><div class="secretary-figure"><img id="hina-character" alt="히나 비서"></div></div><div class="secretary-message"><strong>히나 비서</strong><div id="hina-message" hidden></div><small id="hina-status">QA 조회 전 · 에이전트 미연결</small><small id="hina-asset">전용 애니메이션 미제작</small></div></div>
     <div class="mind-detail">
-      <h3>생존 지능</h3>
-      <p class="muted">CORE 생존 시뮬레이터</p>
+      <div class="mind-domains" id="mind-domains" role="group" aria-label="지능 영역"></div>
+      <h3 id="mind-domain">생존 지능</h3>
+      <p class="muted" id="mind-source">CORE 연결 확인 중</p>
       <dl>
         <div class="mind-experience">
           <dt>경험 축적량 · 바깥 원</dt>
@@ -26,7 +27,7 @@
           <dd id="mind-experience-detail" class="muted"></dd>
         </div>
         <div class="mind-evaluation">
-          <dt>검증된 정책 성능 · 안쪽 원</dt>
+          <dt>검증된 능력 · 안쪽 원</dt>
           <dd id="mind-evaluation">미검증</dd>
           <dd id="mind-evaluation-detail" class="muted"></dd>
         </div>

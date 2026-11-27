@@ -5,6 +5,8 @@ on:
     paths:
       - 'index.html'
       - 'mind/**'
+      - 'scripts/validate-mind-summary.mjs'
+      - 'scripts/stage-pages.sh'
       - 'shared/hina/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
@@ -30,9 +32,7 @@ jobs:
       - run: node desktop/scripts/validate-asset-manifest.mjs idle-manifest.json
       - uses: actions/configure-pages@v5
       - name: Stage committed site files
-        run: |
-          mkdir -p "$RUNNER_TEMP/pages"
-          git archive HEAD | tar -x -C "$RUNNER_TEMP/pages"
+        run: bash scripts/stage-pages.sh "$RUNNER_TEMP/pages"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/pages

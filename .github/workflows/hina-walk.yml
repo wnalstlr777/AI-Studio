@@ -39,9 +39,7 @@ jobs:
           git diff --cached --quiet || (git commit -m 'Add Hina WALK 2D animation asset' && git push)
       - uses: actions/configure-pages@v5
       - name: Stage committed site files
-        run: |
-          mkdir -p "$RUNNER_TEMP/pages"
-          git archive HEAD | tar -x -C "$RUNNER_TEMP/pages"
+        run: bash scripts/stage-pages.sh "$RUNNER_TEMP/pages"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ${{ runner.temp }}/pages

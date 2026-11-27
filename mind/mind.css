@@ -4,19 +4,20 @@
 .mind-layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: center; }
 .mind .secretary { flex: none; flex-direction: column; min-width: 0; max-width: none; justify-content: center; padding-top: 16px; }
 .mind .secretary-message { text-align: center; width: 100%; }
-.mind-orbit { position: relative; display: grid; place-items: center; isolation: isolate; width: min(100%, 290px); aspect-ratio: 1; }
-.mind .secretary-figure { width: 64%; height: 66%; }
-.mind-ring {
-  --progress: 0turn;
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  border-radius: 50%;
-  background: conic-gradient(var(--ring) var(--progress), #294254 0);
-  mask: radial-gradient(farthest-side, transparent calc(100% - 6px), #000 calc(100% - 5px));
-}
-#mind-experience-ring { --ring: #74dec6; }
-#mind-evaluation-ring { --ring: #edc481; inset: 13px; }
+.mind-orbit { position: relative; display: grid; place-items: center; isolation: isolate; width: min(100%, 340px); aspect-ratio: 1; }
+.mind .secretary-figure { width: 59%; height: 60%; }
+#mind-chart { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.mind-segment path { fill: none; stroke-width: 6; }
+.mind-segment .track { stroke: #294254; }
+.mind-segment .experience { stroke: #74dec6; }
+.mind-segment .ability { stroke: #edc481; }
+.mind-segment text { fill: #8ea6b8; font-size: 11px; text-anchor: middle; dominant-baseline: middle; }
+.mind-segment.selected .track { stroke: #49687d; }
+.mind-segment.selected text { fill: #ecf7fa; font-weight: 700; }
+.mind-domains { display: grid; grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 6px; margin-bottom: 16px; }
+.mind-domains button { padding: 6px 4px; border-radius: 7px; border: 1px solid #385267; background: #182c3d; color: #d5edf0; cursor: pointer; font: inherit; font-size: 12px; }
+.mind-domains button[aria-pressed="true"] { border-color: #74dec6; color: #aaf3e5; background: #1b3a43; }
+.mind-domains button:focus-visible { outline: 2px solid #edc481; outline-offset: 2px; }
 .mind-detail { min-width: 0; }
 .mind-detail p { margin: 4px 0; }
 .mind-detail dl { display: grid; gap: 10px; margin: 14px 0; }
