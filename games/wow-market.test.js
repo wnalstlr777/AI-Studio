@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { getRoutePrices, pickHouse, rankListings } from '../scripts/refresh-wow-market.mjs';
+import { dailyMethods, pickHouse, rankListings } from '../scripts/refresh-wow-market.mjs';
 
 test('only a verified Horde house is selected, and ambiguity requires an explicit ID', () => {
   const index = { auctions: [{ id: 99, name: 'Alliance Auction House' },
@@ -18,8 +18,17 @@ test('only thin low-price tiers with positive margin survive', () => {
   assert.deepEqual(rankListings(rows), [{ id: 1, buy: 100, reference: 200, quantity: 2, estimatedProfit: 90 }]);
 });
 
-test('farm prices use the lowest valid quote per known material independently of resale picks', () => {
-  const listing = (id, unit_price) => ({ item: { id }, quantity: 2, unit_price });
-  assert.deepEqual(getRoutePrices([listing(2770, 800), listing(2770, 500), listing(785, 300),
-    listing(2450, -1), listing(123, 100)]), [{ id: 2770, buy: 500 }, { id: 785, buy: 300 }]);
+test('the daily briefing compares gathering, crafting and flipping separately', () => {
+  const listing = (id, unit_price, quantity) => ({ item: { id }, quantity, unit_price });
+  const rows = [listing(3858, 100, 1), listing(3858, 200, 10), listing(3858, 300, 10),
+    listing(3860, 500, 10), listing(3860, 600, 10), listing(3860, 700, 10)];
+  for (let index = 0; index < 8; index++) rows.push(listing(1, 600, 5));
+  rows.push(listing(1, 100, 2));
+  const result = dailyMethods(rows, [
+    { name: 'Mithril Bar', output: 3860, quantity: 1, materials: [{ id: 3858, quantity: 2 }] },
+    { name: 'Missing reagent', output: 3860, quantity: 2, materials: [{ id: 500, quantity: 2 }] },
+  ]);
+  assert.deepEqual(result.farm, [{ id: 3858, buy: 100, net: 95 }]);
+  assert.deepEqual(result.craft, [{ name: 'Mithril Bar', quantity: 1, cost: 300, receipt: 475, profit: 175 }]);
+  assert.equal(result.flips[0].estimatedProfit, 470);
 });

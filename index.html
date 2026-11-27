@@ -59,39 +59,27 @@
 <section class="panel game-panel" aria-labelledby="current-game">
   <h2 id="current-game">지금 하는 게임</h2>
   <p>월드 오브 워크래프트 포에버 <span class="muted">· 한국 호드</span></p>
-  <h3 id="wow-routes">골드 파밍 루트 3개</h3>
-  <p class="muted">이미 있는 채집 기술과 가까운 지역부터 고르세요. 채집 지점은 클래식 지도 자료를 참고했습니다.</p>
-  <ol class="wow-routes" aria-labelledby="wow-routes">
-    <li data-wow-items="2770,2447,765">
-      <h4>초반 호드 · 듀로타</h4>
-      <p>칼바위 언덕에서 북쪽 바위 지대를 돌아오며 채광·약초 채집.</p>
-      <p><strong>팔 것</strong> 구리 광석 · 평온초 · 은엽수</p>
-      <small class="wow-route-prices muted" hidden></small>
-    </li>
-    <li data-wow-items="2771,785,2450">
-      <h4>채집 숙련 후 · 불모의 땅</h4>
-      <p>십자로에서 북쪽 산기슭과 풀밭을 한 바퀴 돌며 광맥과 약초를 함께 채집.</p>
-      <p><strong>팔 것</strong> 주석 광석 · 마법초 · 찔레가시</p>
-      <small class="wow-route-prices muted" hidden></small>
-    </li>
-    <li data-wow-items="2771,765,2450">
-      <h4>동부 왕국에 있다면 · 은빛소나무 숲</h4>
-      <p>공동묘지에서 북쪽 숲길과 서쪽 산기슭을 돌며 약초 위주로 채집.</p>
-      <p><strong>팔 것</strong> 은엽수 · 찔레가시 · 주석 광석</p>
-      <small class="wow-route-prices muted" hidden></small>
-    </li>
-  </ol>
+  <h3 id="wow-routes">오늘 골드 벌기</h3>
   <p id="wow-market-status" class="muted" role="status">한국 호드 시세를 확인 중이에요.</p>
-  <div class="game-sources">
-    <a class="link" href="https://github.com/cjber/gathering-guide-forever">포에버 채집 동선 가이드</a>
-    <a class="link" href="https://github.com/DJWassink/GatherMate2_Data_WoWHead_Classic/tree/master/GatherMate2_Data">클래식 채집 지도</a>
-    <a class="link" href="https://thott.bot/">thott.bot 경매장</a>
+  <div class="wow-routes" aria-labelledby="wow-routes">
+    <section aria-labelledby="wow-farm-title">
+      <h4 id="wow-farm-title">자본 없이 · 재료 파밍</h4>
+      <div id="wow-farm">시세 연결 대기</div>
+    </section>
+    <section aria-labelledby="wow-craft-title">
+      <h4 id="wow-craft-title">전문기술이 있다면 · 제작</h4>
+      <div id="wow-craft">시세 연결 대기</div>
+    </section>
+    <section aria-labelledby="wow-flip-title">
+      <h4 id="wow-flip-title">여유 골드가 있다면 · 재판매</h4>
+      <div id="wow-market-results">시세 연결 대기</div>
+    </section>
   </div>
-  <details class="wow-resale">
-    <summary id="wow-market">경매장 재판매 후보</summary>
-    <div id="wow-market-results"></div>
-    <p class="muted">등록가의 수량 가중 중앙값에 판매된다고 가정하고 수수료 5%를 뺀 개당 차익입니다. 보증금과 미판매 비용은 별도입니다.</p>
-  </details>
+  <p class="muted">경매장 등록가 기준 · 수수료 5% 반영 · 채집 시간, 보증금, 미판매 비용 별도</p>
+  <div class="game-sources">
+    <a class="link" href="https://thott.bot/">시세·제작 자료</a>
+    <a class="link" href="https://github.com/cjber/gathering-guide-forever">재료별 채집 위치</a>
+  </div>
 </section>
 <div class="stats"><div class="stat"><small>연결 예정 프로젝트</small><b>02</b><small>Sea · HINA</small></div><div class="stat"><small>에이전트 역할</small><b>08</b><small>기획 · UI · 배경 · 캐릭터 · 모션 · 이펙트 · 개발 · QA</small></div><div class="stat"><small>자동 검수 구성</small><b>01</b><small>Sea 브라우저 스모크 테스트</small></div></div>
 <div class="layout"><section class="panel"><h3>👥 에이전트 오피스</h3><div class="muted">현재는 역할 시각화 화면입니다. 에이전트의 실시간 작업 상태는 아직 연결되지 않았어요.</div><div class="department-toolbar"><strong>게임 개발 부서</strong><span>부서를 선택해 업무 창 열기</span></div><div class="departments" id="departments"></div><section id="department-window" class="department-window" hidden aria-live="polite"><div class="department-heading"><div><div class="eyebrow">DEPARTMENT WORKSPACE</div><h3 id="department-title"></h3></div><button class="btn" id="department-close" aria-label="부서 창 닫기">닫기</button></div><p class="muted" id="department-summary"></p><h4>담당 업무</h4><ul id="department-duties"></ul><div class="issue-manager"><h4>최근 7일 이슈 <span id="department-issue-count">0건</span></h4><div id="department-issue-list" class="muted">등록된 이슈 없음</div><div class="issue-controls"><input id="department-issue-input" maxlength="160" placeholder="이슈 내용 입력" aria-label="이슈 내용"><button class="btn" id="department-add-issue">이슈 등록</button></div><p class="muted">이슈 기록은 이 브라우저에 저장됩니다. GitHub Issues 자동 연동은 아직 없습니다.</p></div><div class="department-meta"><span class="badge">역할 정의됨 · AI 실행 미연결</span><a class="link" href="https://github.com/wnalstlr777/AI-Studio/blob/main/AGENTS.md" target="_blank" rel="noopener">공통 규칙 보기</a></div></section><div class="line"></div><div class="line"></div><h3>📌 공통 개발 규칙</h3><div class="list"><div class="item"><div><strong>월드 UI 공통 규칙</strong><div><span>거리 · 가림 · 위치 · 캐릭터 겹침</span></div></div><a class="link" href="https://github.com/wnalstlr777/AI-Studio/blob/main/rules/world-ui.md" target="_blank" rel="noopener">보기 ↗</a></div><div class="item"><div><strong>에이전트 운영 규칙</strong><div><span>작업 분배 · 최소 수정 · 검수 보고</span></div></div><a class="link" href="https://github.com/wnalstlr777/AI-Studio/blob/main/AGENTS.md" target="_blank" rel="noopener">보기 ↗</a></div></div></section>

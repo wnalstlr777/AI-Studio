@@ -1,6 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
-import { readMarket, routeItems } from '../games/market-data.js';
+import { readMarket, farmItems } from '../games/market-data.js';
 
 const hours = 60 * 60 * 1000;
 const maximumCopper = 1_000_000_000_000;
@@ -18,7 +18,7 @@ export function pickHouse(index, configuredId) {
   return house.id;
 }
 
-export function rankListings(rows) {
+function indexListings(rows) {
   if (!Array.isArray(rows) || !rows.length) throw new Error('No commodity listings returned');
   const byItem = new Map();
   for (const row of rows) {
@@ -32,11 +32,19 @@ export function rankListings(rows) {
     entries.push({ price, quantity });
     byItem.set(id, entries);
   }
+  for (const listings of byItem.values()) listings.sort((a, b) => a.price - b.price);
   if (!byItem.size) throw new Error('Forever commodity price fields could not be read');
+  return byItem;
+}
+
+export function rankListings(rows) {
+  return rankFlips(indexListings(rows));
+}
+
+function rankFlips(byItem) {
   const picks = [];
   for (const [id, listings] of byItem) {
     if (listings.length < 8) continue;
-    listings.sort((a, b) => a.price - b.price);
     const total = listings.reduce((sum, listing) => sum + listing.quantity, 0);
     if (total < 30) continue;
     let count = 0;
@@ -52,17 +60,73 @@ export function rankListings(rows) {
   return picks.sort((a, b) => b.estimatedProfit - a.estimatedProfit).slice(0, 10);
 }
 
-export function getRoutePrices(rows) {
-  const quotes = new Map();
-  for (const row of rows) {
-    const id = row?.item?.id;
-    const buy = row?.unit_price;
-    if (positive(id) && Object.hasOwn(routeItems, id) && positive(row.quantity) &&
-        positive(buy) && buy <= maximumCopper && !row.item.bonus_lists?.length) {
-      quotes.set(id, Math.min(buy, quotes.get(id) ?? buy));
+function rankFarm(byItem) {
+  return Object.keys(farmItems).map(Number).flatMap(id => {
+    const listings = byItem.get(id);
+    if (!listings || listings.length < 3) return [];
+    const buy = listings[0].price;
+    return [{ id, buy, net: Math.floor(buy * 0.95) }];
+  }).sort((a, b) => b.net - a.net).slice(0, 3);
+}
+
+function buyCost(listings, quantity) {
+  let paid = 0;
+  for (const listing of listings ?? []) {
+    const take = Math.min(quantity, listing.quantity);
+    paid += take * listing.price;
+    quantity -= take;
+    if (!quantity) return paid;
+  }
+  return null;
+}
+
+function rankCraft(byItem, recipes) {
+  return recipes.flatMap(recipe => {
+    const output = byItem.get(recipe.output);
+    if (!output || output.length < 3) return [];
+    let cost = 0;
+    for (const material of recipe.materials) {
+      const paid = buyCost(byItem.get(material.id), material.quantity);
+      if (paid === null) return [];
+      cost += paid;
+    }
+    const receipt = Math.floor(output[0].price * recipe.quantity * 0.95);
+    const profit = receipt - cost;
+    return profit > 0 ? [{ name: recipe.name, quantity: recipe.quantity, cost, receipt, profit }] : [];
+  }).sort((a, b) => b.profit - a.profit).slice(0, 3);
+}
+
+export function dailyMethods(rows, recipes) {
+  const market = indexListings(rows);
+  return { farm: rankFarm(market), craft: rankCraft(market, recipes), flips: rankFlips(market) };
+}
+
+// Candidate IDs are only starting points. Every recipe must resolve in the
+// current Forever namespace with the expected output and deterministic yield.
+const recipeCandidates = [
+  [10097, 3860], [16153, 12359],
+  [17553, 13443], [17557, 13454], [17577, 13461], [24367, 20008],
+];
+
+async function getRecipes(request) {
+  const recipes = [];
+  for (const [recipeId, output] of recipeCandidates) {
+    try {
+      const recipe = await (await request('/data/wow/recipe/' + recipeId, 'static', 'ko_KR')).json();
+      const amount = recipe.crafted_quantity;
+      const quantity = amount?.value ?? (amount?.minimum === amount?.maximum ? amount?.minimum : null);
+      if (recipe.crafted_item?.id !== output || !positive(quantity) || quantity > 100 ||
+          typeof recipe.name !== 'string' || !recipe.name.trim() ||
+          !Array.isArray(recipe.reagents) || !recipe.reagents.length ||
+          !recipe.reagents.every(row => positive(row.reagent?.id) && positive(row.quantity) && row.quantity <= 100) ||
+          new Set(recipe.reagents.map(row => row.reagent.id)).size !== recipe.reagents.length) continue;
+      recipes.push({ output, quantity, name: recipe.name.slice(0, 120),
+        materials: recipe.reagents.map(row => ({ id: row.reagent.id, quantity: row.quantity })) });
+    } catch {
+      // An unconfirmed recipe is excluded from recommendations.
     }
   }
-  return [...quotes].map(([id, buy]) => ({ id, buy }));
+  return recipes;
 }
 
 async function get(url, options = {}) {
@@ -82,7 +146,7 @@ async function refresh(destination, previousFile) {
   // Keep a recent published snapshot on unrelated site builds to avoid rereading the market.
   if (previousFile) {
     const previous = readMarket(JSON.parse(await readFile(previousFile, 'utf8')));
-    if (previous.status === 'ready' && previous.routePrices && Date.now() - Date.parse(previous.observedAt) < 20 * hours &&
+    if (previous.status === 'ready' && previous.farm && previous.craft && Date.now() - Date.parse(previous.observedAt) < 20 * hours &&
         (!process.env.WOW_FOREVER_HORDE_HOUSE_ID || String(previous.houseId) === process.env.WOW_FOREVER_HORDE_HOUSE_ID)) {
       await writeFile(destination, JSON.stringify(previous) + '\n');
       return;
@@ -106,8 +170,9 @@ async function refresh(destination, previousFile) {
   const stamp = new Date(response.headers.get('last-modified') ?? Date.now());
   if (!Number.isFinite(stamp.getTime())) throw new Error('Invalid auction timestamp');
   const { auctions } = await response.json();
-  const candidates = rankListings(auctions);
-  const picks = await Promise.all(candidates.map(async item => {
+  const recipes = await getRecipes(request);
+  const { farm, craft, flips } = dailyMethods(auctions, recipes);
+  const picks = await Promise.all(flips.map(async item => {
     let name = '아이템 #' + item.id;
     try {
       const data = await (await request('/data/wow/item/' + item.id, 'static', 'ko_KR')).json();
@@ -118,7 +183,7 @@ async function refresh(destination, previousFile) {
     return { ...item, name };
   }));
   const result = readMarket({ schemaVersion: 1, game: 'wow-forever', region: 'kr', faction: 'horde',
-    status: 'ready', feeBps: 500, houseId, observedAt: stamp.toISOString(), picks, routePrices: getRoutePrices(auctions) });
+    status: 'ready', feeBps: 500, houseId, observedAt: stamp.toISOString(), picks, farm, craft, recipesChecked: recipes.length });
   await writeFile(destination, JSON.stringify(result) + '\n');
   console.log(`Collected ${picks.length} listing-based candidates from KR Horde house ${houseId}`);
 }
